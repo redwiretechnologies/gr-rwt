@@ -1,0 +1,178 @@
+options:
+  parameters:
+    author: ''
+    category: '[GRC Hier Blocks]'
+    cmake_opt: ''
+    comment: ''
+    copyright: ''
+    description: ''
+    gen_cmake: 'On'
+    gen_linking: dynamic
+    generate_options: no_gui
+    hier_block_src_path: '.:'
+    id: rwt_time_tag_test
+    max_nouts: '0'
+    output_language: python
+    placement: (0,0)
+    qt_qss_theme: ''
+    realtime_scheduling: ''
+    run: 'True'
+    run_command: '{python} -u {filename}'
+    run_options: prompt
+    sizing_mode: fixed
+    thread_safe_setters: ''
+    title: rwt_time_tag_test
+    window_size: ''
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [8, 8]
+    rotation: 0
+    state: enabled
+
+blocks:
+- name: bw
+  id: variable
+  parameters:
+    comment: ''
+    value: 16e6
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [304, 28.0]
+    rotation: 0
+    state: enabled
+- name: samp_rate
+  id: variable
+  parameters:
+    comment: ''
+    value: 4e6
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [208, 28.0]
+    rotation: 0
+    state: enabled
+- name: analog_random_source_x_0
+  id: analog_random_source_x
+  parameters:
+    affinity: ''
+    alias: ''
+    comment: ''
+    max: '255'
+    maxoutbuf: '0'
+    min: '0'
+    minoutbuf: '0'
+    num_samps: '1000'
+    repeat: 'True'
+    type: byte
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [144, 260.0]
+    rotation: 0
+    state: enabled
+- name: digital_gfsk_mod_0
+  id: digital_gfsk_mod
+  parameters:
+    affinity: ''
+    alias: ''
+    bt: '0.35'
+    comment: ''
+    log: 'False'
+    maxoutbuf: '0'
+    minoutbuf: '0'
+    samples_per_symbol: '2'
+    sensitivity: '1.0'
+    verbose: 'False'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [336, 268.0]
+    rotation: 0
+    state: enabled
+- name: epy_block_0
+  id: epy_block
+  parameters:
+    _source_code: "\"\"\"\nAdds time tags for testing purposes.\n\nEach time this\
+      \ file is saved, GRC will instantiate the first class it finds\nto get ports\
+      \ and parameters of your block. The arguments to __init__  will\nbe the parameters.\
+      \ All of them are required to have default values!\n\"\"\"\n\nimport numpy as\
+      \ np\nfrom gnuradio import gr\nimport math\nimport pmt\n\nclass blk(gr.sync_block):\n\
+      \    \"\"\"Embedded Python Block -- Add Time Tags\"\"\"\n\n    def __init__(self,\
+      \ rate=1e6, period_secs=2.0, samples=500e3):\n        \"\"\"\n        The default\
+      \ arguments set a sampling rate of 1Msps that\n        is on 25% of the time.\n\
+      \        \"\"\"\n        gr.sync_block.__init__(\n            self,\n      \
+      \      name='RWT Time Tagger',\n            in_sig=[np.complex64],\n      \
+      \      out_sig=[np.complex64]\n        )\n\n        self.period = period_secs\n\
+      \        self.samples = samples\n        self.rate = rate\n        self.next_tag\
+      \ = 0\n        self.idx = 1\n\n    def work(self, input_items, output_items):\n\
+      \        \"\"\"Sends time tag every 'period_secs'\"\"\"\n\n        in0 = input_items[0]\n\
+      \        out0 = output_items[0]\n\n        while (self.nitems_written(0) + len(in0))\
+      \ > self.next_tag:\n\n            pt_frac, pt_int = math.modf(self.idx * self.period)\n\
+      \            tag_value = pmt.cons(\n                pmt.from_uint64(int(pt_int)),\
+      \ \n                pmt.from_uint64(int(pt_frac*1e9)))\n\n            self.add_item_tag(\n\
+      \                0,\n                self.next_tag,\n                pmt.intern(\"\
+      tx_time\"),\n                tag_value)\n\n            self.idx += 1\n     \
+      \       self.next_tag += int(self.samples)\n\n        out0[:] = in0\n      \
+      \  return len(out0)\n\n"
+    affinity: ''
+    alias: ''
+    comment: ''
+    maxoutbuf: '0'
+    minoutbuf: '0'
+    period_secs: '2'
+    rate: samp_rate
+    samples: samp_rate/2
+  states:
+    _io_cache: ('RWT Time Tagger', 'blk', [('rate', '1000000.0'), ('period_secs',
+      '2.0'), ('samples', '500000.0')], [('0', 'complex', 1)], [('0', 'complex', 1)],
+      'Embedded Python Block -- Add Time Tags', ['rate', 'samples'])
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [536, 268.0]
+    rotation: 0
+    state: true
+- name: sink
+  id: rwt_sink
+  parameters:
+    affinity: ''
+    alias: ''
+    attenuation1: '50'
+    attenuation2: '50'
+    auto_filter: 'True'
+    bandwidth: bw
+    base_addr: '0x9D000000'
+    buffer_size: '32000'
+    comment: ''
+    escape: '0xAAAAAAAAAAAAAAAA'
+    extra: sample_idx_now=0
+    filter: ''
+    force_reload: 'False'
+    freq: 2.398e9
+    rfport: A
+    samplerate: samp_rate
+    tx1_en: 'True'
+    tx2_en: 'False'
+    use_tags: 'True'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [768, 204.0]
+    rotation: 0
+    state: enabled
+
+connections:
+- [analog_random_source_x_0, '0', digital_gfsk_mod_0, '0']
+- [digital_gfsk_mod_0, '0', epy_block_0, '0']
+- [epy_block_0, '0', sink, '0']
+
+metadata:
+  file_format: 1

@@ -1,0 +1,130 @@
+options:
+  parameters:
+    category: '[GRC Hier Blocks]'
+    generate_options: no_gui
+    hier_block_src_path: '.:'
+    id: rwt_burst_tag_test
+    max_nouts: '0'
+    placement: (0,0)
+    run: 'True'
+    run_command: '{python} -u {filename}'
+    run_options: prompt
+    sizing_mode: fixed
+    title: rwt_burst_tag_test
+  states:
+    coordinate: [8, 8]
+    rotation: 0
+    state: enabled
+
+blocks:
+- name: bw
+  id: variable
+  parameters:
+    value: 16e6
+  states:
+    coordinate: [280, 12.0]
+    rotation: 0
+    state: enabled
+- name: samp_rate
+  id: variable
+  parameters:
+    value: 4e6
+  states:
+    coordinate: [184, 12]
+    rotation: 0
+    state: enabled
+- name: variable_0
+  id: variable
+  parameters:
+    value: 16e6
+  states:
+    coordinate: [96, -132.0]
+    rotation: 0
+    state: enabled
+- name: variable_1
+  id: variable
+  parameters:
+    value: 4e6
+  states:
+    coordinate: [32, -132.0]
+    rotation: 0
+    state: enabled
+- name: analog_random_source_x_1
+  id: analog_random_source_x
+  parameters:
+    max: '255'
+    min: '0'
+    num_samps: '1000'
+    repeat: 'True'
+    type: byte
+  states:
+    coordinate: [208, 164.0]
+    rotation: 0
+    state: enabled
+- name: analog_sig_source_x_0
+  id: analog_sig_source_x
+  parameters:
+    amp: '1'
+    freq: '.5'
+    offset: '0'
+    samp_rate: samp_rate
+    type: short
+    waveform: analog.GR_SQR_WAVE
+  states:
+    coordinate: [408, 252.0]
+    rotation: 0
+    state: true
+- name: blocks_burst_tagger_1
+  id: blocks_burst_tagger
+  parameters:
+    false_key: tx_eob
+    false_value: 'False'
+    true_key: tx_sob
+    true_value: 'True'
+    type: complex
+  states:
+    coordinate: [640, 244.0]
+    rotation: 0
+    state: true
+- name: digital_gfsk_mod_1
+  id: digital_gfsk_mod
+  parameters:
+    bt: '0.35'
+    log: 'False'
+    samples_per_symbol: '2'
+    sensitivity: '1.0'
+    verbose: 'False'
+  states:
+    coordinate: [400, 172.0]
+    rotation: 0
+    state: enabled
+- name: rwt_sink_1
+  id: rwt_sink
+  parameters:
+    attenuation1: '50'
+    attenuation2: '50'
+    auto_filter: 'True'
+    bandwidth: bw
+    base_addr: '0x9D000000'
+    buffer_size: '32000'
+    escape: '0xAAAAAAAAAAAAAAAA'
+    force_reload: 'False'
+    freq: 2.398e9
+    rfport: A
+    samplerate: samp_rate
+    tx1_en: 'True'
+    tx2_en: 'False'
+    use_tags: 'True'
+  states:
+    coordinate: [816, 188.0]
+    rotation: 0
+    state: enabled
+
+connections:
+- [analog_random_source_x_1, '0', digital_gfsk_mod_1, '0']
+- [analog_sig_source_x_0, '0', blocks_burst_tagger_1, '1']
+- [blocks_burst_tagger_1, '0', rwt_sink_1, '0']
+- [digital_gfsk_mod_1, '0', blocks_burst_tagger_1, '0']
+
+metadata:
+  file_format: 1

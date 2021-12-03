@@ -1,0 +1,158 @@
+options:
+  parameters:
+    author: ''
+    category: '[GRC Hier Blocks]'
+    cmake_opt: ''
+    comment: ''
+    copyright: ''
+    description: ''
+    gen_cmake: 'On'
+    gen_linking: dynamic
+    generate_options: no_gui
+    hier_block_src_path: '.:'
+    id: rwt_save_short_to_file
+    max_nouts: '0'
+    output_language: python
+    placement: (0,0)
+    qt_qss_theme: ''
+    realtime_scheduling: ''
+    run: 'True'
+    run_command: '{python} -u {filename}'
+    run_options: prompt
+    sizing_mode: fixed
+    thread_safe_setters: ''
+    title: RWT Save to File
+    window_size: ''
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [8, 8]
+    rotation: 0
+    state: enabled
+
+blocks:
+- name: samp_rate
+  id: variable
+  parameters:
+    comment: ''
+    value: '32000'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [184, 12]
+    rotation: 0
+    state: enabled
+- name: blocks_file_sink_0
+  id: blocks_file_sink
+  parameters:
+    affinity: ''
+    alias: ''
+    append: 'False'
+    comment: ''
+    file: real_filename
+    type: short
+    unbuffered: 'False'
+    vlen: '1'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [730, 307]
+    rotation: 0
+    state: true
+- name: blocks_file_sink_0_0
+  id: blocks_file_sink
+  parameters:
+    affinity: ''
+    alias: ''
+    append: 'False'
+    comment: ''
+    file: short_filename
+    type: short
+    unbuffered: 'False'
+    vlen: '1'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [731, 382]
+    rotation: 0
+    state: true
+- name: rwt_source_s16_0
+  id: rwt_source_s16
+  parameters:
+    affinity: ''
+    alias: ''
+    auto_filter: 'True'
+    bandwidth: 40e6
+    base_addr: '0x9D000000'
+    bbdc: 'True'
+    buffer_size: '32000'
+    comment: ''
+    escape: '0xAAAAAAAAAAAAAAAA'
+    extra: ''
+    filter: ''
+    force_reload: 'False'
+    freq: 2.4e9
+    gain_mode: manual
+    manual_gain: '64.0'
+    maxoutbuf: '0'
+    minoutbuf: '0'
+    quadrature: 'True'
+    rfdc: 'True'
+    rfport1: A_BALANCED
+    rfport2: A_BALANCED
+    rx1_en: 'True'
+    rx2_en: 'False'
+    samplerate: 1e6
+    use_tags: 'True'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [318, 314]
+    rotation: 0
+    state: true
+- name: real_filename
+  id: parameter
+  parameters:
+    alias: ''
+    comment: ''
+    hide: none
+    label: ''
+    short_id: ''
+    type: str
+    value: /tmp/real.bin
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [487, 78]
+    rotation: 0
+    state: true
+- name: short_filename
+  id: parameter
+  parameters:
+    alias: ''
+    comment: ''
+    hide: none
+    label: ''
+    short_id: ''
+    type: str
+    value: /tmp/imag.bin
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [613, 76]
+    rotation: 0
+    state: true
+
+connections:
+- [rwt_source_s16_0, '0', blocks_file_sink_0, '0']
+- [rwt_source_s16_0, '1', blocks_file_sink_0_0, '0']
+
+metadata:
+  file_format: 1

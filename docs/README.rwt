@@ -1,0 +1,11 @@
+This is the rwt-write-a-block package meant as a guide to building
+out-of-tree packages. To use the rwt blocks, the Python namespaces
+is in 'rwt', which is imported as:
+
+    import rwt
+
+See the Doxygen documentation for details about the blocks available
+in this package. A quick listing of the details can be found in Python
+after importing by using:
+
+    help(rwt)

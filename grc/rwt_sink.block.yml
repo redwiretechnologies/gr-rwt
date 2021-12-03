@@ -1,0 +1,154 @@
+id: rwt_sink
+label: RWT Sink
+category: "[RWT]"
+flags: throttle
+
+documentation: |-
+  RWT Sink Block
+
+file_format: 1
+
+parameters:
+  - id: tx1_en
+    label: TX1 Enable
+    dtype: bool
+    default: 'True'
+    options: ['1', '0']
+    option_labels: ['True', 'False']
+  - id: tx2_en
+    label: TX2 Enable
+    dtype: bool
+    default: 'False'
+    options: ['1', '0']
+    option_labels: ['True', 'False']
+  - id: freq
+    label: Frequency
+    dtype: real
+    default: 2.4e9
+  - id: samplerate
+    label: Sample rate
+    dtype: real
+    default: 5e6
+  - id: bandwidth
+    label: RF Bandwidth
+    dtype: real
+    default: 40e6
+  - id: rfport
+    label: RF Port Select
+    dtype: enum
+    default: A
+    options:
+      - A
+      - B
+    option_labels:
+      - A
+      - B
+  - id: attenuation1
+    label: Attenuation TX1 (dB)
+    dtype: real
+    default: '10.0'
+  - id: attenuation2
+    label: Attenuation TX2 (dB)
+    dtype: real
+    default: '10.0'
+  - id: filter
+    label: Filter
+    category: Advanced RF
+    dtype: file_open
+    hide: part
+  - id: auto_filter
+    label: Filter auto
+    category: Advanced RF
+    dtype: bool
+    default: 'True'
+    options: ['1', '0']
+    option_labels: ['True', 'False']
+    hide: part
+  - id: extra
+    label: Other Settings
+    category: Advanced RF
+    dtype: string
+    default: ""
+    hide: part
+  - id: base_addr
+    label: Base Address
+    category: Advanced Device
+    dtype: int
+    default: '0x9D000000'
+    hide: part
+  - id: escape
+    label: Packet Escape
+    category: Advanced Device
+    dtype: int
+    default: '0xAAAAAAAAAAAAAAAA'
+    hide: part
+  - id: use_tags
+    label: Use Tags
+    category: Advanced Device
+    dtype: bool
+    default: 'True'
+    options: ['1', '0']
+    option_labels: ['True', 'False']
+  - id: force_reload
+    label: Force Reload
+    category: Advanced Device
+    dtype: bool
+    default: 'False'
+    options: ['1', '0']
+    option_labels: ['True', 'False']
+    hide: part
+  - id: buffer_size
+    label: Buffer Size
+    category: Advanced Device
+    dtype: int
+    default: 32000
+    hide: part
+
+inputs:
+  - domain: message
+    id: ctrl
+    optional: true
+  - domain: stream
+    dtype: complex
+    multiplicity: ${ sum([tx1_en, tx2_en]) }
+
+asserts:
+  - ${ (freq >= 70e6 and freq <= 6e9) }
+  - ${ not (auto_filter and len(filter)) }
+  - ${ (int(samplerate) >= 2084000) or (len(filter) > 0) or auto_filter }
+  - ${ sum([tx1_en, tx2_en]) > 0 }
+
+templates:
+  imports: |-
+    import rwt
+    import pmt
+  make: |-
+        None
+        rwt_cfg = {
+          "tx_freq": str(int(${freq})),
+          "tx_bw": str(int(${bandwidth})),
+          "samplerate": str(int(${samplerate})),
+          "tx_rfport1": "${rfport}",
+          "escape": str(${escape}),
+          "tx_gain1": str(-${attenuation1}),
+          "tx_gain2": str(-${attenuation2}),
+        }
+        rwt_extra = {} if ${extra} == "" else dict(x.split('=') for x in ${extra}.split(','))
+        rwt_cfg.update(rwt_extra)
+        self.${id} = rwt.rwt_sink(
+          pmt.to_pmt(rwt_cfg), ${tx1_en}, ${tx2_en},
+          ${base_addr}, ${filter}, ${use_tags}, ${auto_filter},
+          ${force_reload}, ${buffer_size})
+
+  callbacks:
+    - self.${id}.set_config("tx_freq", str(int(${freq})))
+    - self.${id}.set_config("tx_bw", str(int(${bandwidth})))
+    - self.${id}.set_config("samplerate", str(int(${samplerate})))
+    - self.${id}.set_config("tx_rfport1", "${rfport}")
+    - self.${id}.set_config("escape", str(${escape}))
+    - self.${id}.set_config("tx_gain1", str(-${attenuation1})
+    - self.${id}.set_config("tx_gain2", str(-${attenuation2})
+    - |
+      if ${extra} != "":
+          cfg = dict(x.split('=') for x in ${extra}.split(','))
+          self.${id}.config_msg_handler(pmt.to_pmt(cfg))

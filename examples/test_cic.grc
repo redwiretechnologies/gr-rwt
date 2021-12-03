@@ -1,0 +1,220 @@
+options:
+  parameters:
+    author: ''
+    category: '[GRC Hier Blocks]'
+    cmake_opt: ''
+    comment: ''
+    copyright: ''
+    description: ''
+    gen_cmake: 'On'
+    gen_linking: dynamic
+    generate_options: qt_gui
+    hier_block_src_path: '.:'
+    id: defaultid
+    max_nouts: '0'
+    output_language: python
+    placement: (0,0)
+    qt_qss_theme: ''
+    realtime_scheduling: ''
+    run: 'True'
+    run_command: '{python} -u {filename}'
+    run_options: prompt
+    sizing_mode: fixed
+    thread_safe_setters: ''
+    title: Not titled yet
+    window_size: ''
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [8, 8]
+    rotation: 0
+    state: enabled
+
+blocks:
+- name: samp_rate
+  id: variable
+  parameters:
+    comment: ''
+    value: '32000'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [184, 12]
+    rotation: 0
+    state: enabled
+- name: blocks_message_debug_0
+  id: blocks_message_debug
+  parameters:
+    affinity: ''
+    alias: ''
+    comment: ''
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [1115, 335]
+    rotation: 0
+    state: enabled
+- name: blocks_null_sink_0
+  id: blocks_null_sink
+  parameters:
+    affinity: ''
+    alias: ''
+    bus_structure_sink: '[[0,],]'
+    comment: ''
+    num_inputs: '4'
+    type: short
+    vlen: '1'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [813, 582]
+    rotation: 0
+    state: disabled
+- name: blocks_null_sink_1
+  id: blocks_null_sink
+  parameters:
+    affinity: ''
+    alias: ''
+    bus_structure_sink: '[[0,],]'
+    comment: ''
+    num_inputs: '2'
+    type: complex
+    vlen: '1'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [731, 416]
+    rotation: 0
+    state: true
+- name: blocks_probe_rate_0
+  id: blocks_probe_rate
+  parameters:
+    affinity: ''
+    alias: ''
+    alpha: '0.15'
+    comment: ''
+    maxoutbuf: '0'
+    minoutbuf: '0'
+    mintime: '500.0'
+    type: complex
+    vlen: '1'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [687, 334]
+    rotation: 0
+    state: enabled
+- name: blocks_probe_rate_0_0
+  id: blocks_probe_rate
+  parameters:
+    affinity: ''
+    alias: ''
+    alpha: '0.15'
+    comment: ''
+    maxoutbuf: '0'
+    minoutbuf: '0'
+    mintime: '500.0'
+    type: short
+    vlen: '1'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [675, 523]
+    rotation: 0
+    state: disabled
+- name: rwt_source_0
+  id: rwt_source
+  parameters:
+    affinity: ''
+    alias: ''
+    auto_filter: 'True'
+    bandwidth: int(40e6)
+    base_addr: '0x9D000000'
+    bbdc: 'True'
+    buffer_size: '32000'
+    bypass_enable: '0'
+    comment: ''
+    correction_enable: 'True'
+    escape: '0xAAAAAAAAAAAAAAAA'
+    extra: ''
+    filter: ''
+    force_reload: 'False'
+    freq: 2.4e9
+    gain_mode: manual
+    manual_gain: '64.0'
+    maxoutbuf: '0'
+    minoutbuf: '0'
+    quadrature: 'True'
+    rfdc: 'True'
+    rfport1: A_BALANCED
+    rfport2: A_BALANCED
+    rx1_en: 'True'
+    rx2_en: 'True'
+    samplerate: samp_rate
+    use_tags: 'True'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [329, 286]
+    rotation: 0
+    state: enabled
+- name: rwt_source_s16_0
+  id: rwt_source_s16
+  parameters:
+    affinity: ''
+    alias: ''
+    auto_filter: 'True'
+    bandwidth: int(40e6)
+    base_addr: '0x9D000000'
+    bbdc: 'True'
+    buffer_size: '32000'
+    bypass_enable: 'False'
+    comment: ''
+    correction_enable: 'True'
+    escape: '0xAAAAAAAAAAAAAAAA'
+    extra: ''
+    filter: ''
+    force_reload: 'False'
+    freq: 2.4e9
+    gain_mode: manual
+    manual_gain: '64.0'
+    maxoutbuf: '0'
+    minoutbuf: '0'
+    quadrature: 'True'
+    rfdc: 'True'
+    rfport1: A_BALANCED
+    rfport2: A_BALANCED
+    rx1_en: 'True'
+    rx2_en: 'True'
+    samplerate: samp_rate
+    use_tags: 'True'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [343, 513]
+    rotation: 0
+    state: disabled
+
+connections:
+- [blocks_probe_rate_0, rate, blocks_message_debug_0, print]
+- [blocks_probe_rate_0_0, rate, blocks_message_debug_0, print]
+- [rwt_source_0, '0', blocks_null_sink_1, '0']
+- [rwt_source_0, '1', blocks_null_sink_1, '1']
+- [rwt_source_0, '1', blocks_probe_rate_0, '0']
+- [rwt_source_s16_0, '0', blocks_null_sink_0, '1']
+- [rwt_source_s16_0, '1', blocks_null_sink_0, '0']
+- [rwt_source_s16_0, '2', blocks_null_sink_0, '2']
+- [rwt_source_s16_0, '3', blocks_null_sink_0, '3']
+- [rwt_source_s16_0, '3', blocks_probe_rate_0_0, '0']
+
+metadata:
+  file_format: 1
