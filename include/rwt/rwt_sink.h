@@ -38,7 +38,7 @@ namespace rwt {
 class RWT_API rwt_sink : virtual public rwt_base_block
 {
 public:
-    typedef boost::shared_ptr<rwt_sink> sptr;
+    typedef std::shared_ptr<rwt_sink> sptr;
 
     /*!
      * \brief Return a shared_ptr to a new instance of rwt::rwt_sink.

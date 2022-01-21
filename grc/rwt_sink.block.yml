@@ -33,7 +33,17 @@ parameters:
     label: RF Bandwidth
     dtype: real
     default: 40e6
-  - id: rfport
+  - id: rfport1
+    label: RF Port Select
+    dtype: enum
+    default: A
+    options:
+      - A
+      - B
+    option_labels:
+      - A
+      - B
+  - id: rfport2
     label: RF Port Select
     dtype: enum
     default: A
@@ -128,7 +138,8 @@ templates:
           "tx_freq": str(int(${freq})),
           "tx_bw": str(int(${bandwidth})),
           "samplerate": str(int(${samplerate})),
-          "tx_rfport1": "${rfport}",
+          "tx_rfport1": "${rfport1}",
+          "": "${rfport2}",
           "escape": str(${escape}),
           "tx_gain1": str(-${attenuation1}),
           "tx_gain2": str(-${attenuation2}),

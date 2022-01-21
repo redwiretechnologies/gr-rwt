@@ -37,7 +37,7 @@ namespace rwt {
 class RWT_API rwt_source_s16 : virtual public rwt_base_block
 {
 public:
-    typedef boost::shared_ptr<rwt_source_s16> sptr;
+    typedef std::shared_ptr<rwt_source_s16> sptr;
 
     /*!
      * \brief Return a shared_ptr to a new instance of rwt::rwt_source_s16.

@@ -233,7 +233,7 @@ templates:
           "rx_bw": str(int(${bandwidth})),
           "samplerate": str(int(${samplerate})),
           "rx_rfport1": "${rfport1}",
-          "rx_rfport2": "${rfport2}",
+          "": "${rfport2}",
           "escape": str(${escape}),
           "rx_gain1": str(${manual_gain}),
           "rx_gain1_mode": "${gain_mode}",
