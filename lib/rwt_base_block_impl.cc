@@ -52,7 +52,10 @@ rwt_base_block_impl::rwt_base_block_impl(
     bool is_source,
     bool is_sink,
     const char *personality,
-    bool force_reload) :
+    bool force_reload,
+    const char *phy_name = "ad9361-phy",
+    const char *rx_name = "cf-ad9361-lpc",
+    const char *tx_name = "cf-ad9361-dds-core-lpc") :
     rwt_base_block(name, input_signature, output_signature),
     m_is_source(is_source),
     m_is_sink(is_sink),
@@ -69,7 +72,10 @@ rwt_base_block_impl::rwt_base_block_impl(
     m_common = std::make_shared<base_device_common>(
         reg_base_addr,
         personality,
-        force_reload);
+        force_reload,
+        phy_name,
+        rx_name,
+        tx_name);
 
     if (m_is_source) {
         m_source = std::make_shared<base_device_source>(

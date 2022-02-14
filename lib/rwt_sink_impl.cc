@@ -45,13 +45,18 @@ rwt_sink::make(
     const char *filter,
     bool use_tags,
     bool auto_filter,
+    const char *personality,
     bool force_reload,
-    unsigned int buffer_size)
+    unsigned int buffer_size,
+    const char *phy_name = "ad9361-phy",
+    const char *rx_name = "cf-ad9361-lpc",
+    const char *tx_name = "cf-ad9361-dds-core-lpc")
 {
   return gnuradio::get_initial_sptr
       (new rwt_sink_impl(
           config, ch1_en, ch2_en, reg_base_addr,
-          filter, use_tags, auto_filter, force_reload, buffer_size));
+          filter, use_tags, auto_filter, personality, force_reload,
+          buffer_size, phy_name, rx_name, tx_name));
 }
 
 
@@ -66,8 +71,13 @@ rwt_sink_impl::rwt_sink_impl(
     const char *filter,
     bool use_tags,
     bool auto_filter,
+    const char *personality,
     bool force_reload,
-    unsigned int buffer_size) :
+    unsigned int buffer_size,
+    const char *phy_name,
+    const char *rx_name,
+    const char *tx_name) :
+
     rwt_base_block(
         "rwt_sink",
         gr::io_signature::make(
@@ -87,8 +97,11 @@ rwt_sink_impl::rwt_sink_impl(
         reg_base_addr,
         false,
         true,
-        "default",
-        force_reload),
+        personality,
+        force_reload,
+        phy_name,
+        rx_name,
+        tx_name),
     m_escape(0xaaaaaaaaaaaaaaaa),
     m_in_constructor(true),
     m_ch1_en(ch1_en),

@@ -54,7 +54,11 @@ public:
         bool is_source,
         bool is_sink,
         const char *personality,
-        bool force_reload);
+        bool force_reload,
+        const char *phy_name,
+        const char *rx_name,
+        const char *tx_name);
+
 
     ~rwt_base_block_impl();
 

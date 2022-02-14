@@ -55,8 +55,12 @@ public:
         const char *filter,
         bool use_tags,
         bool auto_filter,
+        const char* personality,
         bool force_reload,
-        unsigned int buffer_size);
+        unsigned int buffer_size,
+        const char *phy_name,
+        const char *rx_name,
+        const char *tx_name);
 
     virtual pmt::pmt_t get_time() = 0;
     virtual uint64_t get_sample_idx() = 0;

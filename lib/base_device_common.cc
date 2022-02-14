@@ -59,7 +59,10 @@ static bool g_fpga_loaded = false;
 static std::string g_fpga_loaded_personality;
 
 base_device_common::base_device_common(
-    unsigned int reg_base_addr, const char *personality, bool force_reload) :
+    unsigned int reg_base_addr, const char *personality, bool force_reload,
+    const char *phy_name = "ad9361-phy",
+    const char *rx_name = "cf-ad9361-lpc",
+    const char *tx_name = "cf-ad9361-dds-core-lpc") :
     m_ctx(NULL),
     m_phy(NULL),
     m_rxdev(NULL)
@@ -76,17 +79,17 @@ base_device_common::base_device_common(
     if (iio_context_get_devices_count(m_ctx) <= 0)
         throw std::runtime_error("No Device");
 
-    m_phy =  iio_context_find_device(m_ctx, "ad9361-phy");
+    m_phy =  iio_context_find_device(m_ctx, phy_name);
     if (!m_phy)
-        throw std::runtime_error("No phy found");
+        throw std::runtime_error(std::string("Missing phy ") + std::string(phy_name));
 
-    m_rxdev = iio_context_find_device(m_ctx, "cf-ad9361-lpc");
+    m_rxdev = iio_context_find_device(m_ctx, rx_name);
     if (!m_rxdev)
-        throw std::runtime_error("Missing RX iio device.");
+        throw std::runtime_error(std::string("Missing RX iio device ") + std::string(rx_name));
 
-    m_txdev = iio_context_find_device(m_ctx, "cf-ad9361-dds-core-lpc");
+    m_txdev = iio_context_find_device(m_ctx, tx_name);
     if (!m_txdev)
-        throw std::runtime_error("Missing TX iio device.");
+        throw std::runtime_error(std::string("Missing TX iio device ") + std::string(tx_name));
 
     m_regs_fd = open("/dev/mem", O_RDWR | O_SYNC);
     if (m_regs_fd < 0)
