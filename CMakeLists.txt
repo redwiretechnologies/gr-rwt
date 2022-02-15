@@ -43,12 +43,12 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 ########################################################################
 # Compiler specific setup
 ########################################################################
-if((CMAKE_CXX_COMPILER_ID MATCHES "Clang" OR
-    CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
-    AND NOT WIN32)
-    #http://gcc.gnu.org/wiki/Visibility
-    add_definitions(-fvisibility=hidden)
-endif()
+#if((CMAKE_CXX_COMPILER_ID MATCHES "Clang" OR
+#    CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
+#    AND NOT WIN32)
+#    #http://gcc.gnu.org/wiki/Visibility
+#    add_definitions(-fvisibility=hidden)
+#endif()
 
 IF(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
     SET(CMAKE_CXX_STANDARD 11)
