@@ -186,6 +186,7 @@ time_helper::get_sample_idx(bool which)
             REG_DEFAULT_GET_SAMPLE_IDX_DAC_MSB,
             REG_DEFAULT_GET_SAMPLE_IDX_DAC_LSB);
     }
+    return ret;
 }
 
 

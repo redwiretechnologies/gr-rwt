@@ -12,15 +12,13 @@ parameters:
   - id: tx1_en
     label: TX1 Enable
     dtype: bool
-    default: 'True'
-    options: ['1', '0']
-    option_labels: ['True', 'False']
+    default: True
+    options: [True, False]
   - id: tx2_en
     label: TX2 Enable
     dtype: bool
-    default: 'False'
-    options: ['1', '0']
-    option_labels: ['True', 'False']
+    default: False
+    options: [True, False]
   - id: freq
     label: Frequency
     dtype: real
@@ -70,9 +68,8 @@ parameters:
     label: Filter auto
     category: Advanced RF
     dtype: bool
-    default: 'True'
-    options: ['1', '0']
-    option_labels: ['True', 'False']
+    default: True
+    options: [True, False]
     hide: part
   - id: extra
     label: Other Settings
@@ -96,16 +93,14 @@ parameters:
     label: Use Tags
     category: Advanced Device
     dtype: bool
-    default: 'True'
-    options: ['1', '0']
-    option_labels: ['True', 'False']
+    default: True
+    options: [True, False]
   - id: force_reload
     label: Force Reload
     category: Advanced Device
     dtype: bool
-    default: 'False'
-    options: ['1', '0']
-    option_labels: ['True', 'False']
+    default: False
+    options: [True, False]
     hide: part
   - id: buffer_size
     label: Buffer Size
@@ -149,7 +144,8 @@ templates:
         self.${id} = rwt.rwt_sink(
           pmt.to_pmt(rwt_cfg), ${tx1_en}, ${tx2_en},
           ${base_addr}, ${filter}, ${use_tags}, ${auto_filter},
-          ${force_reload}, ${buffer_size})
+          "default", ${force_reload}, ${buffer_size},
+          "ad9361-phy", "cf-ad9361-lpc", "cf-ad9361-dds-core-lpc")
 
   callbacks:
     - self.${id}.set_config("tx_freq", str(int(${freq})))
