@@ -133,7 +133,8 @@ templates:
         self.${id} = rwt.rwt_sink(
           pmt.to_pmt(rwt_cfg), ${tx1_en}, ${tx2_en},
           ${base_addr}, ${filter}, ${use_tags}, ${auto_filter},
-          ${force_reload}, ${buffer_size})
+          "default", ${force_reload}, ${buffer_size},
+          "ad9361-phy", "cf-ad9361-lpc", "cf-ad9361-dds-core-lpc")
 
   callbacks:
     - self.${id}.set_config("tx_freq", str(int(${freq})))

@@ -46,8 +46,12 @@ rwt_source::make(
     const char *filter,
     bool use_tags,
     bool auto_filter,
+    const char *personality,
     bool force_reload,
-    unsigned int buffer_size)
+    unsigned int buffer_size,
+    const char *phy_name,
+    const char *rx_name,
+    const char *tx_name)
 {
   return gnuradio::get_initial_sptr
     (new rwt_source_impl(
@@ -58,8 +62,12 @@ rwt_source::make(
         filter,
         use_tags,
         auto_filter,
+        personality,
         force_reload,
-        buffer_size));
+        buffer_size,
+        phy_name,
+        rx_name,
+        tx_name));
 }
 
 
@@ -74,8 +82,12 @@ rwt_source_impl::rwt_source_impl(
     const char *filter,
     bool use_tags,
     bool auto_filter,
+    const char *personality,
     bool force_reload,
-    unsigned int buffer_size) :
+    unsigned int buffer_size,
+    const char *phy_name,
+    const char *rx_name,
+    const char *tx_name) :
     rwt_base_block(
         "rwt_source",
         gr::io_signature::make(0, 0, 0),
@@ -95,8 +107,11 @@ rwt_source_impl::rwt_source_impl(
         reg_base_addr,
         true,
         false,
-        "default",
-        force_reload),
+        personality,
+        force_reload,
+        phy_name,
+        rx_name,
+        tx_name),
     m_escape(0xaaaaaaaaaaaaaaaa),
     m_in_constructor(true),
     m_ch1_en(ch1_en),

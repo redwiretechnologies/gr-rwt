@@ -41,7 +41,10 @@ public:
     base_device_common(
         unsigned int reg_base_addr,
         const char *personality,
-        bool force_reload);
+        bool force_reload,
+        const char *phy_name,
+        const char *rx_name,
+        const char *tx_name);
     ~base_device_common();
 
     void write_reg_raw(uint32_t offset, uint32_t value);
