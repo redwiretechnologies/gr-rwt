@@ -46,7 +46,11 @@ void bind_rwt_source(py::module& m)
            py::arg("config"),
            py::arg("ch1_en"),
            py::arg("ch2_en"),
-           py::arg("reg_base_addr"), py::arg("*filter"), py::arg("use_tags"), py::arg("auto_filter"),
+           py::arg("reg_base_addr"),
+           py::arg("*filter"), 
+           py::arg("use_tags"), 
+           py::arg("auto_filter"),
+           py::arg("personality"),
            py::arg("force_reload"),
            py::arg("buffer_size"),
            py::arg("phy_name").
