@@ -50,12 +50,12 @@ void bind_rwt_source_s16(py::module& m)
            py::arg("*filter"),
            py::arg("use_tags"),
            py::arg("auto_filter"),
-           py::arg("personality"),
+           py::arg("*personality"),
            py::arg("force_reload"),
            py::arg("buffer_size"),
-           py::arg("phy_name").
-           py::arg("rx_name"),
-           py::arg("tx_name"),
+           py::arg("*phy_name").
+           py::arg("*rx_name"),
+           py::arg("*tx_name"),
            D(rwt_source_s16,make)
         )
 
