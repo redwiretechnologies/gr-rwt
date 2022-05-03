@@ -24,6 +24,7 @@
 namespace py = pybind11;
 
 #include <rwt/rwt_source_s16.h>
+#include <rwt/rwt_base_block.h>
 // pydoc.h is automatically generated in the build directory
 #include <rwt_source_s16_pydoc.h>
 
@@ -31,10 +32,12 @@ void bind_rwt_source_s16(py::module& m)
 {
 
     using rwt_source_s16    = gr::rwt::rwt_source_s16;
+    using rwt_base_block    = gr::rwt::rwt_base_block;
 
 
     py::class_<rwt_source_s16,
-	 gr::sync_block,
+         rwt_base_block,
+	     gr::sync_block,
          gr::block,
          gr::basic_block,
         std::shared_ptr<rwt_source_s16>>(m, "rwt_source_s16", D(rwt_source_s16))
@@ -51,7 +54,7 @@ void bind_rwt_source_s16(py::module& m)
            py::arg("buffer_size"),
            D(rwt_source_s16,make)
         )
-        
+
 
 
 

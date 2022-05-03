@@ -21,6 +21,7 @@ namespace py = pybind11;
 // Please do not delete
 /**************************************/
 // BINDING_FUNCTION_PROTOTYPES(
+void bind_rwt_base_block(py::module& m);
 void bind_rwt_sink(py::module& m);
 void bind_rwt_source(py::module& m);
 void bind_rwt_source_s16(py::module& m);
@@ -52,6 +53,7 @@ PYBIND11_MODULE(rwt_python, m)
     // Please do not delete
     /**************************************/
     // BINDING_FUNCTION_CALLS(
+    bind_rwt_base_block(m);
     bind_rwt_sink(m);
     bind_rwt_source(m);
     bind_rwt_source_s16(m);

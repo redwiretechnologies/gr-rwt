@@ -13,8 +13,8 @@
 /* If manual edits are made, the following tags should be modified accordingly.    */
 /* BINDTOOL_GEN_AUTOMATIC(0)                                                       */
 /* BINDTOOL_USE_PYGCCXML(0)                                                        */
-/* BINDTOOL_HEADER_FILE(rwt_source.h)                                        */
-/* BINDTOOL_HEADER_FILE_HASH(4be084145b0f6cfc28ad1ed3f3e25553)                     */
+/* BINDTOOL_HEADER_FILE(rwt_sink.h)                                        */
+/* BINDTOOL_HEADER_FILE_HASH(e38d8ee6b181ee100b84f5ae59bfbcc6)                     */
 /***********************************************************************************/
 
 #include <pybind11/complex.h>
@@ -23,37 +23,23 @@
 
 namespace py = pybind11;
 
-#include <rwt/rwt_source.h>
 #include <rwt/rwt_base_block.h>
 // pydoc.h is automatically generated in the build directory
-#include <rwt_source_pydoc.h>
+#include <rwt_base_block_pydoc.h>
 
-void bind_rwt_source(py::module& m)
+void bind_rwt_base_block(py::module& m)
 {
 
-    using rwt_source     = gr::rwt::rwt_source;
     using rwt_base_block = gr::rwt::rwt_base_block;
 
 
-    py::class_<rwt_source,
-         rwt_base_block,
-	     gr::sync_block,
-         gr::block,
-         gr::basic_block,
-        std::shared_ptr<rwt_source>>(m, "rwt_source", D(rwt_source))
+    py::class_<rwt_base_block,
+	    gr::sync_block,
+        gr::block,
+        gr::basic_block,
+        std::shared_ptr<rwt_base_block>>(m, "rwt_base_block", D(rwt_base_block))
 
-        .def(py::init(&rwt_source::make),
-           py::arg("config"),
-           py::arg("ch1_en"),
-           py::arg("ch2_en"),
-           py::arg("reg_base_addr"), py::arg("*filter"), py::arg("use_tags"), py::arg("auto_filter"),
-           py::arg("force_reload"),
-           py::arg("buffer_size"),
-           D(rwt_source,make)
-        )
-
-
-
+        .def("set_config", &rwt_base_block::set_config, py::arg("key"), py::arg("value"))
 
         ;
 

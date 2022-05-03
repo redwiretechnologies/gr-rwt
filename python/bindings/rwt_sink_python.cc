@@ -24,18 +24,21 @@
 namespace py = pybind11;
 
 #include <rwt/rwt_sink.h>
+#include <rwt/rwt_base_block.h>
 // pydoc.h is automatically generated in the build directory
 #include <rwt_sink_pydoc.h>
 
 void bind_rwt_sink(py::module& m)
 {
 
-    using rwt_sink    = gr::rwt::rwt_sink;
+    using rwt_sink       = gr::rwt::rwt_sink;
+    using rwt_base_block = gr::rwt::rwt_base_block;
 
 
     py::class_<rwt_sink,
-	 gr::sync_block,
-         gr::block,
+        rwt_base_block,
+	    gr::sync_block,
+        gr::block,
         gr::basic_block,
         std::shared_ptr<rwt_sink>>(m, "rwt_sink", D(rwt_sink))
 
@@ -51,7 +54,7 @@ void bind_rwt_sink(py::module& m)
            py::arg("buffer_size"),
            D(rwt_sink,make)
         )
-        
+
 
 
 

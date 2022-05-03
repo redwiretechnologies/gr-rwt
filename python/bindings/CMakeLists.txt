@@ -29,12 +29,13 @@ include(GrPybind)
 ########################################################################
 
 list(APPEND rwt_python_files
+    rwt_base_block_python.cc
     rwt_sink_python.cc
     rwt_source_python.cc
     rwt_source_s16_python.cc
     python_bindings.cc)
 
-GR_PYBIND_MAKE_OOT(rwt 
+GR_PYBIND_MAKE_OOT(rwt
    ../..
    gr::rwt
    "${rwt_python_files}")
