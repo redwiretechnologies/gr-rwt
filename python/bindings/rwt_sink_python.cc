@@ -14,7 +14,7 @@
 /* BINDTOOL_GEN_AUTOMATIC(0)                                                       */
 /* BINDTOOL_USE_PYGCCXML(0)                                                        */
 /* BINDTOOL_HEADER_FILE(rwt_sink.h)                                        */
-/* BINDTOOL_HEADER_FILE_HASH(e38d8ee6b181ee100b84f5ae59bfbcc6)                     */
+/* BINDTOOL_HEADER_FILE_HASH(69e6eeb19564599cc5af678391b7f0b1)                     */
 /***********************************************************************************/
 
 #include <pybind11/complex.h>
@@ -37,7 +37,7 @@ void bind_rwt_sink(py::module& m)
 
     py::class_<rwt_sink,
         rwt_base_block,
-	    gr::sync_block,
+	gr::sync_block,
         gr::block,
         gr::basic_block,
         std::shared_ptr<rwt_sink>>(m, "rwt_sink", D(rwt_sink))
@@ -53,7 +53,7 @@ void bind_rwt_sink(py::module& m)
            py::arg("*personality"),
            py::arg("force_reload"),
            py::arg("buffer_size"),
-           py::arg("*phy_name").
+           py::arg("*phy_name"),
            py::arg("*rx_name"),
            py::arg("*tx_name"),
            D(rwt_sink,make)

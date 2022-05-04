@@ -14,7 +14,7 @@
 /* BINDTOOL_GEN_AUTOMATIC(0)                                                       */
 /* BINDTOOL_USE_PYGCCXML(0)                                                        */
 /* BINDTOOL_HEADER_FILE(rwt_source.h)                                        */
-/* BINDTOOL_HEADER_FILE_HASH(4be084145b0f6cfc28ad1ed3f3e25553)                     */
+/* BINDTOOL_HEADER_FILE_HASH(ef227628157524957207568d46a5f76f)                     */
 /***********************************************************************************/
 
 #include <pybind11/complex.h>
@@ -50,12 +50,12 @@ void bind_rwt_source(py::module& m)
            py::arg("*filter"), 
            py::arg("use_tags"), 
            py::arg("auto_filter"),
-           py::arg("personality"),
+           py::arg("*personality"),
            py::arg("force_reload"),
            py::arg("buffer_size"),
-           py::arg("phy_name").
-           py::arg("rx_name"),
-           py::arg("tx_name"),
+           py::arg("*phy_name"),
+           py::arg("*rx_name"),
+           py::arg("*tx_name"),
            D(rwt_source,make)
         )
 
