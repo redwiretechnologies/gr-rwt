@@ -1,0 +1,233 @@
+#Copywrite 2018 Red Wire Technologies
+#Copywrite 2020 Red Wire Technology
+id: test_order_source
+label: Test Order Source
+category: "[RWT]"
+flags: throttle
+
+documentation: |-
+  Test Order Source Block
+
+file_format: 1
+
+parameters:
+  - id: freq
+    label: Frequency
+    dtype: real
+    default: 2.4e9
+  - id: samplerate
+    label: Sample rate
+    dtype: real
+    default: 5e6
+  - id: bandwidth
+    label: RF Bandwidth
+    dtype: real
+    default: int(40e6)
+  - id: rfport1
+    label: RF Port 1 Select
+    dtype: enum
+    default: A_BALANCED
+    options:
+      - A_BALANCED
+      - B_BALANCED
+      - C_BALANCED
+      - A_N
+      - A_P
+      - B_N
+      - B_P
+      - C_N
+      - C_P
+      - TX_MONITOR1
+      - TX_MONITOR2
+      - TX_MONITOR1_2
+    option_labels:
+      - A_BALANCED
+      - B_BALANCED
+      - C_BALANCED
+      - A_N
+      - A_P
+      - B_N
+      - B_P
+      - C_N
+      - C_P
+      - TX_MONITOR1
+      - TX_MONITOR2
+      - TX_MONITOR1_2
+  - id: rfport2
+    label: RF Port 2 Select
+    dtype: enum
+    default: A_BALANCED
+    options:
+      - A_BALANCED
+      - B_BALANCED
+      - C_BALANCED
+      - A_N
+      - A_P
+      - B_N
+      - B_P
+      - C_N
+      - C_P
+      - TX_MONITOR1
+      - TX_MONITOR2
+      - TX_MONITOR1_2
+    option_labels:
+      - A_BALANCED
+      - B_BALANCED
+      - C_BALANCED
+      - A_N
+      - A_P
+      - B_N
+      - B_P
+      - C_N
+      - C_P
+      - TX_MONITOR1
+      - TX_MONITOR2
+      - TX_MONITOR1_2
+  - id: gain_mode
+    label: Gain Mode
+    dtype: enum
+    default: manual
+    options:
+      - manual
+      - slow_attack
+      - fast_attack
+      - hybrid
+    option_labels:
+      - Manual
+      - Slow
+      - Fast
+      - Hybrid
+  - id: manual_gain
+    label: Manual Gain (dB)
+    dtype: real
+    default: 64.0
+  - id: quadrature
+    label: Quadrature
+    category: Advanced RF
+    dtype: int
+    default: 'True'
+    options: ['1', '0']
+    option_labels: ['True', 'False']
+    hide: part
+  - id: rfdc
+    label: RF DC
+    category: Advanced RF
+    dtype: int
+    default: 'True'
+    options: ['1', '0']
+    option_labels: ['True', 'False']
+    hide: part
+  - id: bbdc
+    label: BB DC
+    category: Advanced RF
+    dtype: int
+    default: 'True'
+    options: ['1', '0']
+    option_labels: ['True', 'False']
+    hide: part
+  - id: filter
+    label: Filter
+    category: Advanced RF
+    dtype: file_open
+    hide: part
+  - id: auto_filter
+    label: Filter auto
+    category: Advanced RF
+    dtype: bool
+    default: True
+    options: [True, False]
+    hide: part
+  - id: extra
+    label: Other Settings
+    category: Advanced RF
+    dtype: string
+    default: ""
+    hide: part
+  - id: base_addr
+    label: Base Address
+    category: Advanced Device
+    dtype: int
+    default: '0x9D000000'
+    hide: part
+  - id: escape
+    label: Packet Escape
+    category: Advanced Device
+    dtype: int
+    default: '0xAAAAAAAAAAAAAAAA'
+    hide: part
+  - id: force_reload
+    label: Force Reload
+    category: Advanced Device
+    dtype: bool
+    default: False
+    options: [True, False]
+    hide: part
+  - id: buffer_size
+    label: Buffer Size
+    category: Advanced Device
+    dtype: int
+    default: 32000
+    hide: part
+
+inputs:
+  - domain: message
+    id: ctrl
+    optional: true
+
+outputs:
+  - domain: stream
+    dtype: int
+    label: ch0
+
+asserts:
+  - ${ (freq >= 70e6 and freq <= 6e9) }
+  - ${ not (auto_filter and len(filter)) }
+  - ${ (int(samplerate) >= 2084000) or (len(filter) > 0) or auto_filter }
+
+templates:
+  imports: |-
+    import rwt
+    import pmt
+  make: |-
+        None
+        rwt_cfg = {
+          "rx_freq": str(int(${freq})),
+          "rx_bw": str(int(${bandwidth})),
+          "samplerate": str(int(${samplerate})),
+          "rx_rfport1": "${rfport1}",
+          "rx_rfport2": "${rfport2}",
+          "escape": str(${escape}),
+          "rx_gain1": str(${manual_gain}),
+          "rx_gain1_mode": "${gain_mode}",
+          "rx_gain2": str(${manual_gain}),
+          "rx_gain2_mode": "${gain_mode}",
+          "quadrature": str(int(${quadrature})),
+          "rfdc": str(int(${rfdc})),
+          "bbdc": str(int(${bbdc})),
+        }
+        rwt_extra = {} if ${extra} == "" else dict(x.split('=') for x in ${extra}.split(','))
+        rwt_cfg.update(rwt_extra)
+        self.${id} = rwt.test_order_source(
+          pmt.to_pmt(rwt_cfg),
+          ${base_addr}, ${filter}, ${auto_filter},
+          "test_order", ${force_reload}, ${buffer_size},
+          "ad9361-phy", "cf-ad9361-lpc", "cf-ad9361-dds-core-lpc")
+
+  callbacks:
+    - self.${id}.set_config("rx_freq", str(int(${freq})))
+    - self.${id}.set_config("rx_bw", str(int(${bandwidth})))
+    - self.${id}.set_config("samplerate", str(int(${samplerate})))
+    - self.${id}.set_config("rx_rfport1", "${rfport1}")
+    - self.${id}.set_config("rx_rfport2", "${rfport2}")
+    - self.${id}.set_config("rx_gain1_mode", "${gain_mode}")
+    - self.${id}.set_config("rx_gain1", str(${manual_gain}))
+    - self.${id}.set_config("rx_gain2_mode", "${gain_mode}")
+    - self.${id}.set_config("rx_gain2", str(${manual_gain}))
+    - self.${id}.set_config("quadrature", str(int(${quadrature})))
+    - self.${id}.set_config("rfdc", str(int(${rfdc})))
+    - self.${id}.set_config("bbdc", str(int(${bbdc})))
+    - self.${id}.set_config("escape", str(${escape}))
+    - |
+      if ${extra} != "":
+          cfg = dict(x.split('=') for x in ${extra}.split(','))
+          self.${id}.config_msg_handler(pmt.to_pmt(cfg))

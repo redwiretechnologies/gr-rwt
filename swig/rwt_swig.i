@@ -11,6 +11,7 @@
 #include "rwt/rwt_base_block.h"
 #include "rwt/rwt_sink.h"
 #include "rwt/rwt_source.h"
+#include "rwt/test_order_source.h"
 #include "rwt/rwt_source_s16.h"
 %}
 
@@ -22,3 +23,5 @@ GR_SWIG_BLOCK_MAGIC2(rwt, rwt_sink);
 GR_SWIG_BLOCK_MAGIC2(rwt, rwt_source);
 %include "rwt/rwt_source_s16.h"
 GR_SWIG_BLOCK_MAGIC2(rwt, rwt_source_s16);
+%include "rwt/test_order_source.h"
+GR_SWIG_BLOCK_MAGIC2(rwt, test_order_source);

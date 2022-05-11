@@ -37,6 +37,8 @@ list(APPEND rwt_sources
     time_helper.cc
     rwt_registers_common.cc
     cic_filter_fpga.cc
+    test_order_registers.cc
+    test_order_source_impl.cc
 )
 
 install(FILES
@@ -48,6 +50,8 @@ install(FILES
     common_tag_types.h
     rwt_base_block_impl.h
     rwt_registers_common.h
+    test_order_registers.h
+    test_order_source_impl.h
     time_helper.h DESTINATION include/rwt
 )
 

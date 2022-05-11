@@ -22,5 +22,6 @@ install(FILES
   rwt_sink.block.yml
   rwt_source.block.yml
   rwt_source_s16.block.yml
+  test_order_source.block.yml
   DESTINATION share/gnuradio/grc/blocks
 )

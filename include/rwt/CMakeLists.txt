@@ -23,6 +23,7 @@
 ########################################################################
 install(FILES
     api.h
+    test_order_source.h
     rwt_base_block.h
     rwt_sink.h
     rwt_source.h
