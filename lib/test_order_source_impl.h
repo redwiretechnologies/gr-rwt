@@ -81,6 +81,8 @@ private:
     bool m_autofilter;
     unsigned long m_samplerate;
 
+    unsigned long long buffer_number = 0;
+
     size_t m_alloc_len;
     uint32_t *m_pkt_data;
 

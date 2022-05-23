@@ -342,6 +342,7 @@ test_order_source_impl::work(
         return 0;
 
     noutput_items = pkt_idx;
+    buffer_number++;
 
     while (!m_tags.empty()) {
         tag = m_tags.front();
@@ -360,6 +361,16 @@ test_order_source_impl::work(
     int *all_output_items = (int*) output_items[0];
     for(int i=0; i<noutput_items; i++)
         all_output_items[i] = m_pkt_data[i];
+
+    if (m_pkt_data[noutput_items-1] - m_pkt_data[0] != noutput_items) {
+
+        for(int i=1; i<noutput_items-1; i++) {
+            if(m_pkt_data[i] - m_pkt_data[i-1] != 1) {
+                printf("Buffer#=%d, i=%d/%d, diff=%d\n", buffer_number,
+                        i, noutput_items, m_pkt_data[i] - m_pkt_data[i-1]);
+            }
+        }
+    }
 
     // Tell runtime system how many output items we produced.
     return noutput_items;
