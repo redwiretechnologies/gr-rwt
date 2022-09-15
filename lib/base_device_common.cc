@@ -80,19 +80,19 @@ base_device_common::base_device_common(
     if (iio_context_get_devices_count(m_ctx) <= 0)
         throw std::runtime_error("No Device");
 
-    if (phy_name != "") {
+    if (strcmp(phy_name, "")) {
         m_phy =  iio_context_find_device(m_ctx, phy_name);
         if (!m_phy)
             throw std::runtime_error(std::string("Missing phy ") + std::string(phy_name));
     }
 
-    if (rx_name != "") {
+    if (strcmp(rx_name, "")) {
         m_rxdev = iio_context_find_device(m_ctx, rx_name);
         if (!m_rxdev)
             throw std::runtime_error(std::string("Missing RX iio device ") + std::string(rx_name));
     }
 
-    if (tx_name != "") {
+    if (strcmp(tx_name, "")) {
         m_txdev = iio_context_find_device(m_ctx, tx_name);
         if (!m_txdev)
             throw std::runtime_error(std::string("Missing TX iio device ") + std::string(tx_name));
