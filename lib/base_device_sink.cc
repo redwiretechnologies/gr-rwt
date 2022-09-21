@@ -99,10 +99,6 @@ base_device_sink::~base_device_sink()
 {
     stop();
 
-    if (m_chan0) iio_channel_disable(m_chan0);
-    if (m_chan1) iio_channel_disable(m_chan1);
-    if (m_chan2) iio_channel_disable(m_chan2);
-    if (m_chan3) iio_channel_disable(m_chan3);
     m_chan0 = NULL;
     m_chan1 = NULL;
     m_chan2 = NULL;
@@ -170,6 +166,10 @@ base_device_sink::stop()
     if (m_buf)
         iio_buffer_destroy(m_buf);
     m_buf = NULL;
+    if (m_chan0) iio_channel_disable(m_chan0);
+    if (m_chan1) iio_channel_disable(m_chan1);
+    if (m_chan2) iio_channel_disable(m_chan2);
+    if (m_chan3) iio_channel_disable(m_chan3);
     return true;
 }
 

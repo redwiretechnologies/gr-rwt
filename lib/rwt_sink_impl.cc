@@ -418,7 +418,9 @@ rwt_sink_impl::start()
 
 bool
 rwt_sink_impl::stop()
-{
+{   
+    set_config("tx_gain1", "-87.5");
+    set_config("tx_gain2", "-87.5");
     m_sink->stop();
     rwt_base_block::stop();
     free_volk_buffers();

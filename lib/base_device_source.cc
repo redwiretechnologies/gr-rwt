@@ -122,10 +122,6 @@ base_device_source::~base_device_source()
 {
     stop();
 
-    if (m_chan0) iio_channel_disable(m_chan0);
-    if (m_chan1) iio_channel_disable(m_chan1);
-    if (m_chan2) iio_channel_disable(m_chan2);
-    if (m_chan3) iio_channel_disable(m_chan3);
 
     m_chan0 = NULL;
     m_chan1 = NULL;
@@ -244,6 +240,10 @@ base_device_source::stop()
         iio_buffer_destroy(m_buf);
     m_buf = NULL;
 
+    if (m_chan0) iio_channel_disable(m_chan0);
+    if (m_chan1) iio_channel_disable(m_chan1);
+    if (m_chan2) iio_channel_disable(m_chan2);
+    if (m_chan3) iio_channel_disable(m_chan3);
     return true;
 }
 

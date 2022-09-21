@@ -28,7 +28,7 @@ parameters:
   - id: samplerate
     label: Sample rate
     dtype: real
-    default: 5e6
+    default: int(5e6)
   - id: bandwidth
     label: RF Bandwidth
     dtype: real
