@@ -385,10 +385,10 @@ rwt_source_s16_impl::work(
            find one). */
         short *data_ptr = m_pkt_data;
         for (int i = 0; i < noutput_items; i++) {
-            *out0_i++ = *data_ptr++;
-            *out0_q++ = *data_ptr++;
             *out1_i++ = *data_ptr++;
             *out1_q++ = *data_ptr++;
+            *out0_i++ = *data_ptr++;
+            *out0_q++ = *data_ptr++;
         }
     }
 

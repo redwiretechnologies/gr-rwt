@@ -394,8 +394,8 @@ base_device_source::read_until_next_tag_or_end(
             pkt_size += 4;
             break;
         case 4:
-            *pkt_data_u32++ = (value >> 32) & 0xffff;
-            *pkt_data_u32++ = (value >> 0) & 0xffff;
+            *pkt_data_u32++ = (value >> 32) & 0xffffffff;
+            *pkt_data_u32++ = (value >> 0) & 0xffffffff;
             pkt_size += 2;
             break;
         case 8:

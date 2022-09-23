@@ -401,10 +401,10 @@ rwt_source_impl::work(
         float *out0_ptr = (float *)out0;
         float *out1_ptr = (float *)out1;
         for (int i = 0; i < noutput_items; i++) {
-            *out0_ptr++ = *data_ptr++;
-            *out0_ptr++ = *data_ptr++;
             *out1_ptr++ = *data_ptr++;
             *out1_ptr++ = *data_ptr++;
+            *out0_ptr++ = *data_ptr++;
+            *out0_ptr++ = *data_ptr++;
         }
     }
 
