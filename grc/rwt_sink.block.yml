@@ -154,8 +154,8 @@ templates:
     - self.${id}.set_config("rx_rfport1", "${rfport1}")
     - self.${id}.set_config("rx_rfport2", "${rfport2}")
     - self.${id}.set_config("escape", str(${escape}))
-    - self.${id}.set_config("tx_gain1", str(-${attenuation1})
-    - self.${id}.set_config("tx_gain2", str(-${attenuation2})
+    - self.${id}.set_config("tx_gain1", str(-${attenuation1}))
+    - self.${id}.set_config("tx_gain2", str(-${attenuation2}))
     - |
       if ${extra} != "":
           cfg = dict(x.split('=') for x in ${extra}.split(','))
