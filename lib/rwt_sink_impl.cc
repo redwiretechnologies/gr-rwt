@@ -140,7 +140,7 @@ rwt_sink_impl::rwt_sink_impl(
     for (int i = 0; i < (sizeof(handlers)/sizeof(char *)); i++) {
         set_config_handler(
             handlers[i],
-            boost::bind(&rwt_sink_impl::ctrl_reg_handler, this, _1, _2));
+            std::bind(&rwt_sink_impl::ctrl_reg_handler, this, std::placeholders::_1, std::placeholders::_2));
     }
 
     m_common->check_user_blkid(

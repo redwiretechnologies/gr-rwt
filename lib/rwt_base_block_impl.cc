@@ -91,7 +91,7 @@ rwt_base_block_impl::rwt_base_block_impl(
     message_port_register_in(MSG_PORT_CONTROL);
     set_msg_handler(
         MSG_PORT_CONTROL,
-        boost::bind(&rwt_base_block_impl::config_msg_handler, this, _1));
+        std::bind(&rwt_base_block_impl::config_msg_handler, this, std::placeholders::_1));
 }
 
 /*

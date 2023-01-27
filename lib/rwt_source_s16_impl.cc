@@ -144,17 +144,17 @@ rwt_source_s16_impl::rwt_source_s16_impl(
     for (int i = 0; i < (sizeof(handlers)/sizeof(char *)); i++) {
         set_config_handler(
             handlers[i],
-            boost::bind(&rwt_source_s16_impl::ctrl_reg_handler, this, _1, _2));
+            std::bind(&rwt_source_s16_impl::ctrl_reg_handler, this, std::placeholders::_1, std::placeholders::_2));
     }
     for (int i = 0; i < (sizeof(common_registers_rwt->handlers)/sizeof(char *)); i++) {
         set_config_handler(
             common_registers_rwt->handlers[i],
-            boost::bind(&rwt_source_s16_impl::ctrl_reg_handler, this, _1, _2));
+            std::bind(&rwt_source_s16_impl::ctrl_reg_handler, this, std::placeholders::_1, std::placeholders::_2));
     }
     for (int i = 0; i < (sizeof(cic_frontend->handlers)/sizeof(char *)); i++) {
         set_config_handler(
             cic_frontend->handlers[i],
-            boost::bind(&rwt_source_s16_impl::ctrl_reg_handler, this, _1, _2));
+            std::bind(&rwt_source_s16_impl::ctrl_reg_handler, this, std::placeholders::_1, std::placeholders::_2));
     }
 
     m_common->check_user_blkid(
