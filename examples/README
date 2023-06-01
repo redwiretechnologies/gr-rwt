@@ -1,4 +1,11 @@
-It is considered good practice to add examples in here to demonstrate the
-functionality of your OOT module. Python scripts, GRC flow graphs or other
-code can go here.
+This are mainly test examples used for development and basic functionality.  This all work with gnuradio_companion
+The 3 grc files are used to test using zmg for control of the radio
+zmq_remotectrl_source_local.grc
+zmq_remotectrl_source.grc
+zmq_remotectrl_sink_local.grc
+
+test_cic.grc  //Used to test the data speed to make sure the cic filter is working as intended
+rwt_time_tag_test.grc //a test file used for testing code in development for timed transmissons
+rwt_save_short_to_file.grc  //Used to save the complex received shorts at real and imag parts.  This allows smaller files because the RF front end only uses 16 bits for I and Q data
+rwt_burst_tag_test.grc. //   A test file for code in develpoment to transmit based on tags
 
