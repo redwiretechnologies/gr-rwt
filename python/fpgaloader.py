@@ -18,6 +18,8 @@ import re
 import os.path as osp
 import os
 import errno
+import json
+import smbus
 from enum import IntEnum
 
 # @todo: This is a hack. Yocto doesn't set these or default to UTF-8.. so
@@ -29,8 +31,14 @@ import click
 
 DTBO_BASE_DIR = '/configfs/device-tree/overlays/'
 FW_BASE_DIR = '/lib/firmware/'
+JSON_LOC = '/home/root/board_id'
 FPGA_MGR_DIR = '/sys/class/fpga_manager/fpga0/'
 VAR_STATE_DIR = '/var/run/rwt/'
+PC_CARDS = {'PC0'  : 0x52,
+            'PC1'  : 0x53,
+            'CPC1' : 0x55,
+            'CPC2' : 0x3C,
+            'CPC3' : 0x2C}
 
 class Status(IntEnum):
     SUCCESS = 0
@@ -135,6 +143,77 @@ def list_personalities():
 
     return personalities
 
+def _remove_overlay(overlaydir):
+#    print("Remove overlay: {}".format(overlaydir))
+#    return
+    shutil.rmtree(overlaydir, ignore_errors=True)
+    os.makedirs(overlaydir, exist_ok=True)
+
+def _apply_overlay(overlaydir, overlayfile):
+#    print("Overlay File: {}".format(overlayfile))
+#    print("Overlay Directory: {}".format(overlaydir))
+#    return Status.SUCCESS
+    _writefile(overlayfile, osp.join(overlaydir, 'path'))
+
+    # Check overlay status
+    status = _readfile(osp.join(overlaydir, 'status'))
+    if not status.startswith('applied'):
+        return Status.ERROR_APPLYING_OVERLAY
+
+    return Status.SUCCESS
+
+def _remove_pc_cards():
+    for p in PC_CARDS.keys():
+        overlaydir = osp.join(DTBO_BASE_DIR, p)
+        _remove_overlay(overlaydir)
+
+def _apply_pc_cards():
+    returns = []
+    for i, p in enumerate(PC_CARDS):
+        overlaydir = osp.join(DTBO_BASE_DIR, p)
+        ret = _detect_pc_card(PC_CARDS[p])
+        if ret != -1:
+            returns.append(_apply_overlay(overlaydir, "rwt/{}-{}.dtbo".format(ret, i)))
+        else:
+            returns.append(Status.SUCCESS)
+    return returns
+
+def _detect_pc_card(p):
+
+    bus = smbus.SMBus(0)
+
+    try:
+        bus.read_byte_data(p, 0x00)
+
+        # Open the JSON file which defines all of the boards
+        f = open("{}/board_id.json".format(JSON_LOC))
+        board_id_lookup = json.load(f)
+        f.close()
+
+        short_form = bus.read_i2c_block_data(p, 0x7d, 3)
+
+        t  = short_form[0]
+        n  = short_form[1]
+        r  = short_form[2]
+        r  = str(r>>4) + "_" + str(r & 15)
+
+        board_name = board_id_lookup["id"][board_id_lookup["type"][t]][n]
+
+        if board_id_lookup["type"][t] != "Personality":
+            print("Invalid short form!")
+            print("  ", t)
+            print("  ", n)
+            print("  ", r)
+            return -1
+
+        if board_name in board_id_lookup["no_dts"]:
+            print("Found board {} on no_dts list".format(board_name))
+            return -1
+
+        return "{}-{}".format(board_name, r)
+    except:
+        return -1
+
 def switch(personality, force=True):
     """
     Switch to the specified personality.
@@ -177,9 +256,11 @@ def switch(personality, force=True):
     # Set the current personality to None in case of a failure.
     _set_current('')
 
+    # Remove any applied DTS for personality cards
+    _remove_pc_cards()
+
     # Remove the old overlay
-    shutil.rmtree(overlaydir, ignore_errors=True)
-    os.makedirs(overlaydir, exist_ok=True)
+    _remove_overlay(overlaydir)
 
     # Load the bitfile
     _writefile("0\n", osp.join(FPGA_MGR_DIR, "flags"))
@@ -191,12 +272,14 @@ def switch(personality, force=True):
         return Status.BITFILE_LOAD_FAILED
 
     # Apply the overlay
-    _writefile(dtbo, osp.join(overlaydir, 'path'))
+    status = _apply_overlay(overlaydir, dtbo)
+    if status != Status.SUCCESS:
+        return status
 
-    # Check overlay status
-    status = _readfile(osp.join(overlaydir, 'status'))
-    if not status.startswith('applied'):
-        return Status.ERROR_APPLYING_OVERLAY
+    statuses = _apply_pc_cards()
+    for status in statuses:
+        if status != Status.SUCCESS:
+            return status
 
     _set_current(personality)
 
