@@ -31,7 +31,7 @@ import click
 
 DTBO_BASE_DIR = '/configfs/device-tree/overlays/'
 FW_BASE_DIR = '/lib/firmware/'
-JSON_LOC = '/home/root/board_id'
+JSON_LOC = '/usr/bin'
 FPGA_MGR_DIR = '/sys/class/fpga_manager/fpga0/'
 VAR_STATE_DIR = '/var/run/rwt/'
 PC_CARDS = {'PC0'  : 0x52,
