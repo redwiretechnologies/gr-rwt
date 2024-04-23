@@ -278,7 +278,19 @@ def switch(personality, force=True):
         return Status.MISSING_CMDLINE
     chip = match.group(1)
 
+    overlaydir = osp.join(DTBO_BASE_DIR, 'rwt')
+
+    # Set the current personality to None in case of a failure.
+    _set_current('')
+
+    # Remove any applied DTS for personality cards
+    _remove_pc_cards()
+
+    # Remove the old overlay
+    _remove_overlay(overlaydir)
+
     carrier = _detect_carrier()
+    personality_orig = personality
     if carrier == "Carbon":
         backpack = _detect_backpack()
         if backpack == "CARP":
@@ -289,7 +301,6 @@ def switch(personality, force=True):
     print(carrier)
 
     fwdir = osp.join('rwt', personality)
-    overlaydir = osp.join(DTBO_BASE_DIR, 'rwt')
     dtbo = osp.join(fwdir, 'overlay.dtbo')
     bitfile = osp.join(fwdir, chip, 'download.bin')
 
@@ -307,15 +318,6 @@ def switch(personality, force=True):
         ret = os.system('mount -t configfs configfs /configfs')
         if ret != 0:
             return Status.ERROR_MOUNTING_CONFIGFS
-
-    # Set the current personality to None in case of a failure.
-    _set_current('')
-
-    # Remove any applied DTS for personality cards
-    _remove_pc_cards()
-
-    # Remove the old overlay
-    _remove_overlay(overlaydir)
 
     # Load the bitfile
     _writefile("0\n", osp.join(FPGA_MGR_DIR, "flags"))
@@ -336,7 +338,7 @@ def switch(personality, force=True):
         if status != Status.SUCCESS:
             return status
 
-    _set_current(personality)
+    _set_current(personality_orig)
 
     return Status.SUCCESS
 
