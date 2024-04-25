@@ -266,6 +266,15 @@ def switch(personality, force=True):
     If force is False and the current running personality is requested,
     the personality is not reloaded.
     """
+    
+    #Make sure configs is mounted before working with overlays
+    if not osp.exists('/configfs/device-tree'):
+        os.makedirs('/configfs', exist_ok=True)
+        ret = os.system('mount -t configfs configfs /configfs')
+        if ret != 0:
+            return Status.ERROR_MOUNTING_CONFIGFS
+
+    
 
     if not force:
         current = get_current()
@@ -313,13 +322,7 @@ def switch(personality, force=True):
     if not osp.exists(osp.join(FW_BASE_DIR, dtbo)):
         return Status.OVERLAY_NOT_FOUND
 
-    if not osp.exists('/configfs/device-tree'):
-        os.makedirs('/configfs', exist_ok=True)
-        ret = os.system('mount -t configfs configfs /configfs')
-        if ret != 0:
-            return Status.ERROR_MOUNTING_CONFIGFS
-
-    # Load the bitfile
+   # Load the bitfile
     _writefile("0\n", osp.join(FPGA_MGR_DIR, "flags"))
     _writefile(bitfile, osp.join(FPGA_MGR_DIR, "firmware"))
 
