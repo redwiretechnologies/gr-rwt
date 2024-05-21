@@ -110,6 +110,9 @@ protected:
 
     friend class base_device_source;
     friend class base_device_sink;
+    friend class base_device_dual_source;
+    friend class base_device_dual_sink;
+
 };
 
 
