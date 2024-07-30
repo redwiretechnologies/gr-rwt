@@ -173,21 +173,24 @@ def _apply_pc_cards(carrier):
         overlaydir = osp.join(DTBO_BASE_DIR, p)
         ret = _detect_pc_card(PC_CARDS[p], carrier)
         if ret != -1:
+            bus = 1
+            if carrier == "Carbon":
+                bus = 0
             #Tellurium requires some settings to be loaded before the driver loads.  The driver currently does not allow all of 0x01 to be set
             if ret == "Tellurium-1_0":
                 if i == 0:
-                    result = os.system('i2cset -y 0 0x18 0x04 0x0005 w')
-                    result = os.system('i2cset -y 0 0x18 0x01 0x0C06 w')
+                    result = os.system('i2cset -y {} 0x18 0x04 0x0005 w'.format(bus))
+                    result = os.system('i2cset -y {} 0x18 0x01 0x0C06 w'.format(bus))
                 if i == 2:
-                    result = os.system('i2cset -y 0 0x1F 0x04 0x0005 w')
-                    result = os.system('i2cset -y 0 0x1F 0x01 0x0C06 w')
+                    result = os.system('i2cset -y {} 0x1F 0x04 0x0005 w'.format(bus))
+                    result = os.system('i2cset -y {} 0x1F 0x01 0x0C06 w'.format(bus))
                 if i == 3:
-                    result = os.system('i2cset -y 0 0x76 0x04 0x0005 w')
-                    result = os.system('i2cset -y 0 0x76 0x01 0x0C06 w')
+                    result = os.system('i2cset -y {} 0x76 0x04 0x0005 w'.format(bus))
+                    result = os.system('i2cset -y {} 0x76 0x01 0x0C06 w'.format(bus))
                 if i == 4:
-                    result = os.system('i2cset -y 0 0x66 0x04 0x0005 w')
-                    result = os.system('i2cset -y 0 0x66 0x01 0x0C0g w')
-                    
+                    result = os.system('i2cset -y {} 0x66 0x04 0x0005 w'.format(bus))
+                    result = os.system('i2cset -y {} 0x66 0x01 0x0C0g w'.format(bus))
+
             returns.append(_apply_overlay(overlaydir, "rwt/{}-{}.dtbo".format(ret, i)))
         else:
             returns.append(Status.SUCCESS)
@@ -281,7 +284,7 @@ def switch(personality, force=True):
     If force is False and the current running personality is requested,
     the personality is not reloaded.
     """
-    
+
     #Make sure configs is mounted before working with overlays
     if not osp.exists('/configfs/device-tree'):
         os.makedirs('/configfs', exist_ok=True)
@@ -289,7 +292,7 @@ def switch(personality, force=True):
         if ret != 0:
             return Status.ERROR_MOUNTING_CONFIGFS
 
-    
+
 
     if not force:
         current = get_current()
