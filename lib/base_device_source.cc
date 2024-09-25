@@ -101,6 +101,7 @@ base_device_source::base_device_source(
     common->add_attr_alias("rx_rfport1", "in_voltage0_rf_port_select");
     common->add_attr_alias("rx_rfport2", "in_voltage1_rf_port_select");
 
+    rx_mask = iio_create_channels_mask(iio_device_get_channels_count(common->m_rxdev));
     m_chan0 = iio_device_find_channel(common->m_rxdev, "voltage0", false);
     m_chan1 = iio_device_find_channel(common->m_rxdev, "voltage1", false);
     if (!m_chan0 || !m_chan1)
@@ -111,10 +112,10 @@ base_device_source::base_device_source(
     if (!m_chan2 || !m_chan3)
         m_single_channel = true;
 
-    if (m_chan0) iio_channel_disable(m_chan0);
-    if (m_chan1) iio_channel_disable(m_chan1);
-    if (m_chan2) iio_channel_disable(m_chan2);
-    if (m_chan3) iio_channel_disable(m_chan3);
+    if (m_chan0) iio_channel_disable(m_chan0, rx_mask);
+    if (m_chan1) iio_channel_disable(m_chan1, rx_mask);
+    if (m_chan2) iio_channel_disable(m_chan2, rx_mask);
+    if (m_chan3) iio_channel_disable(m_chan3, rx_mask);
 }
 
 
@@ -143,7 +144,8 @@ base_device_source::thread_refill()
         m_buf_len = 0;
 
         lock.unlock();
-        ret = iio_buffer_refill(m_buf);
+        m_rxblock = iio_stream_get_next_block(rx_stream);
+        ret = iio_err(m_rxblock);
         lock.lock();
 
         m_do_refill = false;
@@ -154,7 +156,8 @@ base_device_source::thread_refill()
         if (ret < 0)
             break;
 
-        m_buf_len = ret;
+        m_buf_len = ((uintptr_t)iio_block_end(m_rxblock) -
+                    (uintptr_t)iio_block_start(m_rxblock));
         m_cv2.notify_all();
     }
 
@@ -195,24 +198,27 @@ base_device_source::start(bool ch1_en, bool ch2_en)
     }
 
     if (ch1_en) {
-        iio_channel_enable(m_chan0);
-        iio_channel_enable(m_chan1);
+        iio_channel_enable(m_chan0, rx_mask);
+        iio_channel_enable(m_chan1, rx_mask);
         if (!m_chan0 || !m_chan1)
             throw std::runtime_error("Unable to find channels!\n");
     }
 
     if (ch2_en) {
-        iio_channel_enable(m_chan2);
-        iio_channel_enable(m_chan3);
+        iio_channel_enable(m_chan2, rx_mask);
+        iio_channel_enable(m_chan3, rx_mask);
 
         if (!m_chan2 || !m_chan3)
             throw std::runtime_error("Unable to find channels!\n");
     }
 
-    m_buf = iio_device_create_buffer(m_common->m_rxdev, m_buffer_size, false);
+    m_buf = iio_device_create_buffer(m_common->m_rxdev, 0, rx_mask);
     if (!m_buf)
         throw std::runtime_error("Unable to create buffer!\n");
 
+    rx_stream = iio_buffer_create_stream(m_buf, 8, m_buffer_size);
+    if (!rx_stream)
+        throw std::runtime_error("Unable to create rx_stream!\n");
 
     m_thread_refill = boost::thread(&base_device_source::thread_refill, this);
 
@@ -239,11 +245,18 @@ base_device_source::stop()
     if (m_buf)
         iio_buffer_destroy(m_buf);
     m_buf = NULL;
+//    if (rx_stream)
+//        iio_stream_destroy(rx_stream);
+//    rx_stream = NULL;
 
-    if (m_chan0) iio_channel_disable(m_chan0);
-    if (m_chan1) iio_channel_disable(m_chan1);
-    if (m_chan2) iio_channel_disable(m_chan2);
-    if (m_chan3) iio_channel_disable(m_chan3);
+    if (m_chan0) iio_channel_disable(m_chan0, rx_mask);
+    if (m_chan1) iio_channel_disable(m_chan1, rx_mask);
+    if (m_chan2) iio_channel_disable(m_chan2, rx_mask);
+    if (m_chan3) iio_channel_disable(m_chan3, rx_mask);
+    if (rx_mask)
+        iio_channels_mask_destroy(rx_mask);
+    rx_mask = NULL;
+
     return true;
 }
 
@@ -298,7 +311,7 @@ base_device_source::buffer_next(uint64_t **data)
         }
     }
 
-    *data = (uint64_t *)iio_buffer_start(m_buf);
+    *data = (uint64_t *)iio_block_start(m_rxblock);
     return m_buf_len / 8;
 }
 

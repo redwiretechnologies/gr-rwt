@@ -4,10 +4,10 @@ PKG_CHECK_MODULES(PC_IIO "libiio")
 FIND_PATH(IIO_INCLUDE_DIRS
     NAMES iio.h
     HINTS ${PC_IIO_INCLUDE_DIR}
-    ${CMAKE_INSTALL_PREFIX}/include
+    ${CMAKE_INSTALL_PREFIX}/include/iio
     PATHS
-    /usr/local/include
-    /usr/include
+    /usr/local/include/iio
+    /usr/include/iio
 )
 
 FIND_LIBRARY(IIO_LIBRARIES
@@ -16,7 +16,7 @@ FIND_LIBRARY(IIO_LIBRARIES
     ${CMAKE_INSTALL_PREFIX}/lib
     ${CMAKE_INSTALL_PREFIX}/lib64
     PATHS
-    ${IIO_INCLUDE_DIRS}/../lib
+    ${IIO_INCLUDE_DIRS}/../../lib
     /usr/local/lib
     /usr/lib
 )

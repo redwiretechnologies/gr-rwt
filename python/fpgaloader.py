@@ -31,7 +31,7 @@ import click
 
 DTBO_BASE_DIR = '/configfs/device-tree/overlays/'
 FW_BASE_DIR = '/lib/firmware/'
-JSON_LOC = '/home/root/board_id'
+JSON_LOC = '/usr/bin'
 FPGA_MGR_DIR = '/sys/class/fpga_manager/fpga0/'
 VAR_STATE_DIR = '/var/run/rwt/'
 PC_CARDS = {'PC0'  : 0x52,
@@ -167,20 +167,42 @@ def _remove_pc_cards():
         overlaydir = osp.join(DTBO_BASE_DIR, p)
         _remove_overlay(overlaydir)
 
-def _apply_pc_cards():
+def _apply_pc_cards(carrier):
     returns = []
     for i, p in enumerate(PC_CARDS):
         overlaydir = osp.join(DTBO_BASE_DIR, p)
-        ret = _detect_pc_card(PC_CARDS[p])
+        ret = _detect_pc_card(PC_CARDS[p], carrier)
         if ret != -1:
+            bus = 1
+            if carrier == "Carbon":
+                bus = 0
+            #Tellurium requires some settings to be loaded before the driver loads.  The driver currently does not allow all of 0x01 to be set
+            if ret == "Tellurium-1_0":
+                if i == 0:
+                    result = os.system('i2cset -y {} 0x18 0x04 0x0005 w'.format(bus))
+                    result = os.system('i2cset -y {} 0x18 0x01 0x0C06 w'.format(bus))
+                if i == 2:
+                    result = os.system('i2cset -y {} 0x1F 0x04 0x0005 w'.format(bus))
+                    result = os.system('i2cset -y {} 0x1F 0x01 0x0C06 w'.format(bus))
+                if i == 3:
+                    result = os.system('i2cset -y {} 0x76 0x04 0x0005 w'.format(bus))
+                    result = os.system('i2cset -y {} 0x76 0x01 0x0C06 w'.format(bus))
+                if i == 4:
+                    result = os.system('i2cset -y {} 0x66 0x04 0x0005 w'.format(bus))
+                    result = os.system('i2cset -y {} 0x66 0x01 0x0C0g w'.format(bus))
+
             returns.append(_apply_overlay(overlaydir, "rwt/{}-{}.dtbo".format(ret, i)))
         else:
             returns.append(Status.SUCCESS)
     return returns
 
-def _detect_pc_card(p):
+def _detect_pc_card(p, carrier):
 
-    bus = smbus.SMBus(0)
+    bus = ""
+    if (carrier == "Carbon"):
+        bus = smbus.SMBus(0)
+    else:
+        bus = smbus.SMBus(1)
 
     try:
         bus.read_byte_data(p, 0x00)
@@ -190,7 +212,7 @@ def _detect_pc_card(p):
         board_id_lookup = json.load(f)
         f.close()
 
-        short_form = bus.read_i2c_block_data(p, 0x7d, 3)
+        short_form = bus.read_i2c_block_data(p, 0xfd, 3)
 
         t  = short_form[0]
         n  = short_form[1]
@@ -209,10 +231,51 @@ def _detect_pc_card(p):
         if board_name in board_id_lookup["no_dts"]:
             print("Found board {} on no_dts list".format(board_name))
             return -1
+        else:
+            r = str(short_form[2]>>4)
+            r = board_id_lookup["major_rev_map"][board_name][r]
+            r = r.replace(".", "_")
 
         return "{}-{}".format(board_name, r)
     except:
         return -1
+
+def _detect_carrier():
+    bus = smbus.SMBus(1)
+
+    try:
+        bus.read_byte_data(0x50, 0x00)
+
+        # Open the JSON file which defines all of the boards
+        f = open("{}/board_id.json".format(JSON_LOC))
+        board_id_lookup = json.load(f)
+        f.close()
+
+        short_form = bus.read_i2c_block_data(0x50, 0xfd, 3)
+
+        t  = short_form[0]
+        n  = short_form[1]
+        r  = short_form[2]
+        r  = str(r>>4) + "_" + str(r & 15)
+
+        board_name = board_id_lookup["id"][board_id_lookup["type"][t]][n]
+        return board_name
+    except:
+        return ""
+
+def _detect_backpack():
+    bus = smbus.SMBus(0)
+    try:
+        # Address 0x22 occupied on both CARP and CARDF
+        a = bus.read_byte(0x22)
+        try:
+            # Address 0x21 only used on CARP
+            b = bus.read_byte(0x21)
+            return "CARP"
+        except:
+            return "CARDF"
+    except:
+        return ""
 
 def switch(personality, force=True):
     """
@@ -221,6 +284,15 @@ def switch(personality, force=True):
     If force is False and the current running personality is requested,
     the personality is not reloaded.
     """
+
+    #Make sure configs is mounted before working with overlays
+    if not osp.exists('/configfs/device-tree'):
+        os.makedirs('/configfs', exist_ok=True)
+        ret = os.system('mount -t configfs configfs /configfs')
+        if ret != 0:
+            return Status.ERROR_MOUNTING_CONFIGFS
+
+
 
     if not force:
         current = get_current()
@@ -233,8 +305,29 @@ def switch(personality, force=True):
         return Status.MISSING_CMDLINE
     chip = match.group(1)
 
-    fwdir = osp.join('rwt', personality)
     overlaydir = osp.join(DTBO_BASE_DIR, 'rwt')
+
+    # Set the current personality to None in case of a failure.
+    _set_current('')
+
+    # Remove any applied DTS for personality cards
+    _remove_pc_cards()
+
+    # Remove the old overlay
+    _remove_overlay(overlaydir)
+
+    carrier = _detect_carrier()
+    personality_orig = personality
+    if carrier == "Carbon":
+        backpack = _detect_backpack()
+        if backpack == "CARP":
+            personality = personality + "-carp"
+        elif backpack == "CARDF":
+            personality = personality + "-cardf"
+        print(backpack)
+    print(carrier)
+
+    fwdir = osp.join('rwt', personality)
     dtbo = osp.join(fwdir, 'overlay.dtbo')
     bitfile = osp.join(fwdir, chip, 'download.bin')
 
@@ -247,22 +340,7 @@ def switch(personality, force=True):
     if not osp.exists(osp.join(FW_BASE_DIR, dtbo)):
         return Status.OVERLAY_NOT_FOUND
 
-    if not osp.exists('/configfs/device-tree'):
-        os.makedirs('/configfs', exist_ok=True)
-        ret = os.system('mount -t configfs configfs /configfs')
-        if ret != 0:
-            return Status.ERROR_MOUNTING_CONFIGFS
-
-    # Set the current personality to None in case of a failure.
-    _set_current('')
-
-    # Remove any applied DTS for personality cards
-    _remove_pc_cards()
-
-    # Remove the old overlay
-    _remove_overlay(overlaydir)
-
-    # Load the bitfile
+   # Load the bitfile
     _writefile("0\n", osp.join(FPGA_MGR_DIR, "flags"))
     _writefile(bitfile, osp.join(FPGA_MGR_DIR, "firmware"))
 
@@ -276,12 +354,12 @@ def switch(personality, force=True):
     if status != Status.SUCCESS:
         return status
 
-    statuses = _apply_pc_cards()
+    statuses = _apply_pc_cards(carrier)
     for status in statuses:
         if status != Status.SUCCESS:
             return status
 
-    _set_current(personality)
+    _set_current(personality_orig)
 
     return Status.SUCCESS
 

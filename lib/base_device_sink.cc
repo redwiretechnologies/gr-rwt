@@ -80,6 +80,7 @@ base_device_sink::base_device_sink(
     common->add_attr_alias("tx_gain", "out_voltage0_hardwaregain");
     common->add_attr_alias("tx_gain", "out_voltage1_hardwaregain");
 
+    tx_mask = iio_create_channels_mask(iio_device_get_channels_count(common->m_txdev));
     m_chan0 = iio_device_find_channel(common->m_txdev, "voltage0", true);
     m_chan1 = iio_device_find_channel(common->m_txdev, "voltage1", true);
     m_chan2 = iio_device_find_channel(common->m_txdev, "voltage2", true);
@@ -88,10 +89,10 @@ base_device_sink::base_device_sink(
     if (!m_chan0 || !m_chan1 || !m_chan2 || !m_chan3)
         throw std::runtime_error("Unable to find channels!\n");
 
-    iio_channel_disable(m_chan0);
-    iio_channel_disable(m_chan1);
-    iio_channel_disable(m_chan2);
-    iio_channel_disable(m_chan3);
+    iio_channel_disable(m_chan0, tx_mask);
+    iio_channel_disable(m_chan1, tx_mask);
+    iio_channel_disable(m_chan2, tx_mask);
+    iio_channel_disable(m_chan3, tx_mask);
 }
 
 
@@ -111,12 +112,10 @@ base_device_sink::send_buffer()
 {
     int ret;
 
-    ret = iio_buffer_push(m_buf);
-    if ((ret < 0) && (ret != -ETIMEDOUT)) {
-        char buf[256];
-        iio_strerror(-ret, buf, sizeof(buf));
-        std::string error(buf);
-        std::cerr << "Unable to push buffer: " << error << std::endl;
+    m_txblock = iio_stream_get_next_block(tx_stream);
+    ret = iio_err(m_txblock);
+    if (ret) {
+        std::cerr << "Unable to send block: " << ret << std::endl;
     }
 
     return ret;
@@ -126,8 +125,8 @@ base_device_sink::send_buffer()
 uint64_t *
 base_device_sink::get_buffer_data(size_t *len)
 {
-    uintptr_t start = (uintptr_t)iio_buffer_start(m_buf);
-    uintptr_t end = (uintptr_t)iio_buffer_end(m_buf);
+    uintptr_t start = (uintptr_t)iio_block_start(m_txblock);
+    uintptr_t end = (uintptr_t)iio_block_end(m_txblock);
 
     *len = (end - start) / 8;
     return (uint64_t *)start;
@@ -143,18 +142,22 @@ base_device_sink::start(bool ch1_en, bool ch2_en)
 
     if (ch1_en)
     {
-        iio_channel_enable(m_chan0);
-        iio_channel_enable(m_chan1);
+        iio_channel_enable(m_chan0, tx_mask);
+        iio_channel_enable(m_chan1, tx_mask);
     }
     if (ch2_en)
     {
-        iio_channel_enable(m_chan2);
-        iio_channel_enable(m_chan3);
+        iio_channel_enable(m_chan2, tx_mask);
+        iio_channel_enable(m_chan3, tx_mask);
     }
 
-    m_buf = iio_device_create_buffer(m_common->m_txdev, m_buffer_size, false);
+    m_buf = iio_device_create_buffer(m_common->m_txdev, 0, tx_mask);
     if (!m_buf)
         throw std::runtime_error("Unable to create buffer!\n");
+
+    tx_stream = iio_buffer_create_stream(m_buf, 4, m_buffer_size);
+    if (!tx_stream)
+        throw std::runtime_error("Unable to create tx_stream!\n");
 
     return true;
 }
@@ -166,10 +169,16 @@ base_device_sink::stop()
     if (m_buf)
         iio_buffer_destroy(m_buf);
     m_buf = NULL;
-    if (m_chan0) iio_channel_disable(m_chan0);
-    if (m_chan1) iio_channel_disable(m_chan1);
-    if (m_chan2) iio_channel_disable(m_chan2);
-    if (m_chan3) iio_channel_disable(m_chan3);
+    if (tx_stream)
+        iio_stream_destroy(tx_stream);
+    tx_stream = NULL;
+    if (m_chan0) iio_channel_disable(m_chan0, tx_mask);
+    if (m_chan1) iio_channel_disable(m_chan1, tx_mask);
+    if (m_chan2) iio_channel_disable(m_chan2, tx_mask);
+    if (m_chan3) iio_channel_disable(m_chan3, tx_mask);
+    if (tx_mask)
+        iio_channels_mask_destroy(tx_mask);
+    tx_mask = NULL;
     return true;
 }
 

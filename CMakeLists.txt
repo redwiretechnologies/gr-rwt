@@ -84,6 +84,7 @@ endif()
 ########################################################################
 # Install directories
 ########################################################################
+set(PYBIND11_PYTHONLIBS_OVERWRITE OFF)
 include(FindPkgConfig)
 find_package(Gnuradio "3.9" REQUIRED)
 include(GrVersion)

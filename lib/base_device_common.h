@@ -30,7 +30,8 @@
 #include <memory>
 
 #include <pmt/pmt.h>
-#include <iio.h>
+#include <iio/iio.h>
+#include <iio/iio-backend.h>
 
 namespace gr {
 namespace rwt {
@@ -110,8 +111,14 @@ protected:
 
     friend class base_device_source;
     friend class base_device_sink;
+    friend class base_device_dual_source;
+    friend class base_device_dual_sink;
+
 };
 
+int iio_device_identify_filename(const struct iio_device *dev,
+    const char *filename, struct iio_channel **chn,
+    const char **attr);
 
 } /* namespace iio */
 } /* namespace gr */

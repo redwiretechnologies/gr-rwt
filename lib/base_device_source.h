@@ -31,7 +31,7 @@
 #include <string>
 #include <memory>
 
-#include <iio.h>
+#include <iio/iio.h>
 #include <pmt/pmt.h>
 #include "base_device_common.h"
 
@@ -74,6 +74,10 @@ private:
     struct iio_channel *m_chan1;
     struct iio_channel *m_chan2;
     struct iio_channel *m_chan3;
+    struct iio_channels_mask *rx_mask;
+    struct iio_stream *rx_stream;
+    const struct iio_block *m_rxblock;
+
     unsigned int m_buffer_size;
     unsigned int m_buf_len;
     bool m_do_refill;

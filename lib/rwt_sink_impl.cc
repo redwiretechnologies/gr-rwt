@@ -410,6 +410,7 @@ rwt_sink_impl::start()
     if (!ret)
         return ret;
 
+    m_sink->send_buffer();
     m_data = m_sink->get_buffer_data(&m_data_len);
     m_data_idx = 0;
 
@@ -418,7 +419,7 @@ rwt_sink_impl::start()
 
 bool
 rwt_sink_impl::stop()
-{   
+{
     set_config("tx_gain1", "-87.5");
     set_config("tx_gain2", "-87.5");
     m_sink->stop();

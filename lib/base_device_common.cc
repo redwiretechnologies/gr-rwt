@@ -73,7 +73,7 @@ base_device_common::base_device_common(
         throw std::runtime_error("Failed to load rwt image!\n");
     }
 
-    m_ctx = iio_create_default_context();
+    m_ctx = iio_create_context(NULL, "local:");
     if (!m_ctx)
         throw std::runtime_error("Unable to create context");
 
@@ -264,6 +264,43 @@ base_device_common::set_attrs(const std::map<std::string, std::string> &config)
     return status;
 }
 
+int iio_device_identify_filename(const struct iio_device *dev,
+	const char *filename, struct iio_channel **chn,
+	const char **attr)
+{
+    unsigned int i;
+
+    unsigned int num_channels = iio_device_get_channels_count(dev);
+    unsigned int num_attrs;
+    const struct iio_attr *attrib;
+
+	for (i = 0; i < num_channels; i++) {
+		struct iio_channel *ch = iio_device_get_channel(dev, i);
+		unsigned int j;
+
+        num_attrs = iio_channel_get_attrs_count(ch);
+		for (j = 0; j < num_attrs; j++) {
+            attrib = iio_channel_get_attr(ch, j);
+			if (!strcmp(attrib->filename, filename)) {
+				*attr = attrib->name;
+				*chn = ch;
+				return 0;
+			}
+		}
+	}
+
+    num_attrs = iio_device_get_attrs_count(dev);
+	for (i = 0; i < num_attrs; i++) {
+        attrib = iio_device_get_attr(dev, i);
+		if (!strcmp(attrib->name, filename)) {
+			*attr = attrib->name;
+			*chn = NULL;
+			return 0;
+		}
+	}
+
+	return -EINVAL;
+}
 
 bool
 base_device_common::set_attr(
@@ -304,24 +341,32 @@ base_device_common::set_attr_internal(
     const char *val)
 {
     int ret;
+    const struct iio_attr *attrib;
 
     std::cout << "set_attr_internal(" << attr << ", " << val << ")\n";
 
-    if (chn)
-        ret = iio_channel_attr_write(chn, attr, val);
-    else if (iio_device_find_attr(m_phy, attr))
-        ret = iio_device_attr_write(m_phy, attr, val);
-    else
-        ret = iio_device_debug_attr_write(m_phy, attr, val);
+    if (chn) {
+        attrib = iio_channel_find_attr(chn, attr);
+        ret = iio_attr_write_string(attrib, val);
+    }
+    else {
+        attrib = iio_device_find_attr(m_phy, attr);
+        if (attrib)
+            ret = iio_attr_write_string(attrib, val);
+        else {
+            attrib = iio_device_find_debug_attr(m_phy, attr);
+            ret = iio_attr_write_string(attrib, val);
+        }
+    }
 
     if (ret < 0) {
         std::cerr << "Unable to write attribute " << attr
                   <<  ": " << ret << std::endl;
         return false;
     }
+
     return true;
 }
-
 
 bool
 base_device_common::setup_filter(
@@ -371,8 +416,8 @@ base_device_common::load_filter_file(std::string &filter)
     ifs.read(buffer, length);
     ifs.close();
 
-    int ret = iio_device_attr_write_raw(
-        m_phy, "filter_fir_config", buffer, length);
+    const struct iio_attr *attr = iio_device_find_attr(m_phy, "filter_fir_config");
+    int ret = iio_attr_write_raw(attr, buffer, length);
 
     delete[] buffer;
     return ret > 0;
