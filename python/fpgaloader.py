@@ -179,7 +179,7 @@ def _apply_pc_cards(carrier):
             returns.append(_apply_overlay(overlaydir, "rwt/{}-{}.dtbo".format(ret, i)))
 
             #Tellurium, Argon, and Bismuth require configuration of the Over-Temp protection via I2C.
-            if "Tellurium" in ret or "Bismuth" in ret or "Argon" in ret:
+            if "TELLURIUM" in ret or "BISMUTH" in ret or "ARGON" in ret:
                 if i == 0:
                     result = os.system('i2cset -y {} 0x18 0x04 0x0005 w'.format(bus))
                     result = os.system('i2cset -y {} 0x18 0x01 0x0C06 w'.format(bus))
@@ -236,7 +236,7 @@ def _detect_pc_card(p, carrier):
             r = board_id_lookup["major_rev_map"][board_name][r]
             r = r.replace(".", "_")
 
-        return "{}-{}".format(board_name, r)
+        return "{}-{}".format(board_name.upper(), r)
     except:
         return -1
 
