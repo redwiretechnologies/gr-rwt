@@ -176,7 +176,7 @@ def _apply_pc_cards(carrier):
             bus = 1
             if carrier == "Carbon":
                 bus = 0
-<<<<<<< HEAD
+
             #Tellurium requires some settings to be loaded before the driver loads.  The driver currently does not allow all of 0x01 to be set
             if ret == "Tellurium-1_0":
                 if i == 0:
