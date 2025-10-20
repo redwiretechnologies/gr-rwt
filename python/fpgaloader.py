@@ -176,6 +176,7 @@ def _apply_pc_cards(carrier):
             bus = 1
             if carrier == "Carbon":
                 bus = 0
+<<<<<<< HEAD
             #Tellurium requires some settings to be loaded before the driver loads.  The driver currently does not allow all of 0x01 to be set
             if ret == "Tellurium-1_0":
                 if i == 0:
@@ -192,6 +193,21 @@ def _apply_pc_cards(carrier):
                     result = os.system('i2cset -y {} 0x66 0x01 0x0C0g w'.format(bus))
 
             returns.append(_apply_overlay(overlaydir, "rwt/{}-{}.dtbo".format(ret, i)))
+
+            #Tellurium, Argon, and Bismuth require configuration of the Over-Temp protection via I2C.
+            if "TELLURIUM" in ret or "BISMUTH" in ret or "ARGON" in ret:
+                if i == 0:
+                    result = os.system('i2cset -y {} 0x18 0x04 0x0005 w'.format(bus))
+                    result = os.system('i2cset -y {} 0x18 0x01 0x0C06 w'.format(bus))
+                if i == 2:
+                    result = os.system('i2cset -y {} 0x1F 0x04 0x0005 w'.format(bus))
+                    result = os.system('i2cset -y {} 0x1F 0x01 0x0C06 w'.format(bus))
+                if i == 3:
+                    result = os.system('i2cset -y {} 0x76 0x04 0x0005 w'.format(bus))
+                    result = os.system('i2cset -y {} 0x76 0x01 0x0C06 w'.format(bus))
+                if i == 4:
+                    result = os.system('i2cset -y {} 0x66 0x04 0x0005 w'.format(bus))
+                    result = os.system('i2cset -y {} 0x66 0x01 0x0C06 w'.format(bus))
         else:
             returns.append(Status.SUCCESS)
     return returns
@@ -236,7 +252,7 @@ def _detect_pc_card(p, carrier):
             r = board_id_lookup["major_rev_map"][board_name][r]
             r = r.replace(".", "_")
 
-        return "{}-{}".format(board_name, r)
+        return "{}-{}".format(board_name.upper(), r)
     except:
         return -1
 
@@ -313,11 +329,15 @@ def switch(personality, force=True):
     # Remove any applied DTS for personality cards
     _remove_pc_cards()
 
+    # Remove CARDF (if applied)
+    _remove_overlay(osp.join(DTBO_BASE_DIR, 'CARDF'))
+
     # Remove the old overlay
     _remove_overlay(overlaydir)
 
     carrier = _detect_carrier()
     personality_orig = personality
+    backpack = None
     if carrier == "Carbon":
         backpack = _detect_backpack()
         if backpack == "CARP":
@@ -358,6 +378,12 @@ def switch(personality, force=True):
     for status in statuses:
         if status != Status.SUCCESS:
             return status
+
+    if backpack == "CARDF":
+        temp_dir = osp.join(DTBO_BASE_DIR, 'CARDF')
+        status = _apply_overlay(temp_dir, "rwt/CARDF.dtbo")
+    if status != Status.SUCCESS:
+        return status
 
     _set_current(personality_orig)
 

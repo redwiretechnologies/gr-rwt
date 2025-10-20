@@ -157,7 +157,6 @@ add_custom_target(uninstall
 ########################################################################
 add_subdirectory(include/rwt)
 add_subdirectory(lib)
-add_subdirectory(apps)
 add_subdirectory(docs)
 # NOTE: manually update below to use GRC to generate C++ flowgraphs w/o python
 add_subdirectory(python)
