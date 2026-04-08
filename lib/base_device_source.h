@@ -64,6 +64,8 @@ public:
     void setup_tags(bool use_escape, uint64_t escape);
     bool stop();
 
+    bool m_single_channel;
+
 private:
     void thread_refill();
 
@@ -85,7 +87,6 @@ private:
     size_t m_raw_len;
     uint64_t *m_raw_data;
     size_t m_raw_idx;
-    bool m_single_channel;
 
     boost::condition_variable m_cv;
     boost::condition_variable m_cv2;
