@@ -212,11 +212,11 @@ base_device_source::start(bool ch1_en, bool ch2_en)
             throw std::runtime_error("Unable to find channels!\n");
     }
 
-    m_buf = iio_device_create_buffer(m_common->m_rxdev, 0, rx_mask);
+    m_buf = iio_device_get_buffer(m_common->m_rxdev, 0);
     if (!m_buf)
         throw std::runtime_error("Unable to create buffer!\n");
 
-    rx_stream = iio_buffer_create_stream(m_buf, 8, m_buffer_size);
+    rx_stream = iio_buffer_create_stream(m_buf, 8, m_buffer_size, rx_mask);
     if (!rx_stream)
         throw std::runtime_error("Unable to create rx_stream!\n");
 
@@ -229,7 +229,7 @@ base_device_source::start(bool ch1_en, bool ch2_en)
 bool
 base_device_source::stop()
 {
-    if (m_buf) iio_buffer_cancel(m_buf);
+    //if (m_buf) iio_buffer_close(m_buf);
 
     boost::unique_lock<boost::mutex> lock(m_lock);
     m_do_refill = true;
@@ -242,8 +242,8 @@ base_device_source::stop()
     m_raw_data = NULL;
     m_raw_idx = 0;
 
-    if (m_buf)
-        iio_buffer_destroy(m_buf);
+    //if (m_buf)
+    //    iio_buffer_close(m_buf);
     m_buf = NULL;
 //    if (rx_stream)
 //        iio_stream_destroy(rx_stream);

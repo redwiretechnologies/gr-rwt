@@ -151,11 +151,11 @@ base_device_sink::start(bool ch1_en, bool ch2_en)
         iio_channel_enable(m_chan3, tx_mask);
     }
 
-    m_buf = iio_device_create_buffer(m_common->m_txdev, 0, tx_mask);
+    m_buf = iio_device_get_buffer(m_common->m_txdev, 0);
     if (!m_buf)
         throw std::runtime_error("Unable to create buffer!\n");
 
-    tx_stream = iio_buffer_create_stream(m_buf, 4, m_buffer_size);
+    tx_stream = iio_buffer_create_stream(m_buf, 4, m_buffer_size, tx_mask);
     if (!tx_stream)
         throw std::runtime_error("Unable to create tx_stream!\n");
 
@@ -166,8 +166,8 @@ base_device_sink::start(bool ch1_en, bool ch2_en)
 bool
 base_device_sink::stop()
 {
-    if (m_buf)
-        iio_buffer_destroy(m_buf);
+    //if (m_buf)
+      //  iio_buffer_destroy(m_buf);
     m_buf = NULL;
     if (tx_stream)
         iio_stream_destroy(tx_stream);
